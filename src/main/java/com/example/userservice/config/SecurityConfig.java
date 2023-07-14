@@ -1,7 +1,6 @@
 package com.example.userservice.config;
 
 import com.example.userservice.filter.JwtFilterToken;
-import com.example.userservice.service.AuthService;
 import com.example.userservice.service.AuthenticationService;
 import com.example.userservice.service.JwtService;
 import lombok.RequiredArgsConstructor;

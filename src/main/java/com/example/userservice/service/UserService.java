@@ -3,6 +3,7 @@ package com.example.userservice.service;
 import com.example.userservice.domain.dto.request.LoginRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.dto.response.JwtResponse;
+import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.user.PermissionEntity;
 import com.example.userservice.domain.entity.user.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
@@ -13,14 +14,17 @@ import com.example.userservice.exception.UserBadRequestException;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.repository.VerificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final VerificationRepository verificationRepository;
     private final ModelMapper modelMapper;
     private final MailService mailService;
     private final JwtService jwtService;
@@ -40,13 +45,18 @@ public class UserService {
         checkUserEmail(userRequestDto.getEmail());
 
         UserEntity userEntity = modelMapper.map(userRequestDto, UserEntity.class);
-        userEntity.setVerificationCode(generateVerificationCode());
         userEntity.setState(UserState.UNVERIFIED);
         userEntity.setRoles(getRolesFromStrings(userRequestDto.getRoles()));
         userEntity.setPermissions(getPermissionsFromStrings(userRequestDto.getPermissions()));
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
-        userRepository.save(userEntity);
-        return mailService.sendVerificationCode(userEntity.getEmail(), userEntity.getVerificationCode());
+        UserEntity save = userRepository.save(userEntity);
+        VerificationEntity verificationEntity = VerificationEntity.builder()
+                .userId(save)
+                .code(generateVerificationCode())
+                .link("http://localhost:8081/{"+ save.getId() +"}/verify")
+                .isActive(true)
+                .build();
+        return mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
     }
     public JwtResponse signIn(LoginRequestDto loginRequestDto){
         UserEntity userEntity = userRepository.findByEmail(loginRequestDto.getEmail())
@@ -60,6 +70,23 @@ public class UserService {
                     .build();
         }
         throw new AuthenticationFailedException("Incorrect username or password");
+    }
+
+    public String verify(UUID userId,String code){
+        VerificationEntity entity = verificationRepository.findByUserId(userId)
+                .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
+
+        if (code.equals(entity.getCode())){
+            if (entity.getCreatedDate().plusMinutes(1).isBefore(LocalDateTime.now())){
+                UserEntity user = userRepository.findById(userId)
+                        .orElseThrow(() -> new DataNotFoundException("User Not Found"));
+                user.setState(UserState.ACTIVE);
+                userRepository.save(user);
+                return "Successfully Verified!";
+            }
+            return "Verification Code has Expired!";
+        }
+        return "Wrong Verification Code!";
     }
 
     private String generateVerificationCode() {

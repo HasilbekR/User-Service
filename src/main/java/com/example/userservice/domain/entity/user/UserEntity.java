@@ -30,7 +30,6 @@ public class UserEntity extends BaseEntity implements UserDetails {
     @ManyToMany
     private List<PermissionEntity> permissions;
     private UserState state;
-    private String verificationCode;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

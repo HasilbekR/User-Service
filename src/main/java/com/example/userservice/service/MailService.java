@@ -18,8 +18,8 @@ public class MailService {
     @Value("${services.notification-url}")
     private String notificationServiceUrl;
 
-    public String sendVerificationCode(String email, String verificationCode) {
-        String message = "This is your verification code: " + verificationCode;
+    public String sendVerificationCode(String email, String verificationCode,String link) {
+        String message = "This is your verification code: " + verificationCode + "\nThis is your link "+ link;
         return sendMail(message, email, "/send-single");
     }
 

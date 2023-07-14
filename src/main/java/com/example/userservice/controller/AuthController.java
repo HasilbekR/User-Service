@@ -16,7 +16,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/auth")
+@RequestMapping("/user/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
