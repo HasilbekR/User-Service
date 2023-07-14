@@ -1,9 +1,7 @@
 package com.example.userservice.domain.entity.user;
 
 import com.example.userservice.domain.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,6 +27,7 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private List<RoleEntity> roles;
     @ManyToMany
     private List<PermissionEntity> permissions;
+    @Enumerated(EnumType.STRING)
     private UserState state;
 
     @Override
