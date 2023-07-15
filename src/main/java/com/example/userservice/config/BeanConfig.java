@@ -11,8 +11,11 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class BeanConfig {
     @Bean
-    public ModelMapper modelMapper(){
-        return new ModelMapper();
+    public ModelMapper modelMapper() {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+        return modelMapper;
     }
     @Bean
     public PasswordEncoder passwordEncoder(){
