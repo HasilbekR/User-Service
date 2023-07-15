@@ -165,6 +165,7 @@ public class UserService {
     private List<RoleEntity> getRolesFromStrings(List<String> roles) {
         return roleRepository.findRoleEntitiesByNameIn(roles);
     }
+
     public JwtResponse getNewAccessToken(Principal principal) {
         UserEntity userEntity = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new DataNotFoundException("user not found"));
