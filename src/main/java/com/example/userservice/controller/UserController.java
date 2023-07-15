@@ -20,4 +20,28 @@ public class UserController {
     ){
         return userService.verify(userId,code);
     }
+
+    @GetMapping("/forgotten-password")
+    public String forgottenPassword(
+            @RequestParam UUID userId
+    ) {
+        return userService.forgottenPassword(userId);
+    }
+    @GetMapping("/{userId}/verify-code-for-update-password")
+    public String verifyCodeForUpdatePassword(
+            @PathVariable UUID userId,
+            @RequestParam String code
+    ){
+        return userService.verifyPasswordForUpdatePassword(userId,code);
+    }
+
+
+    @PutMapping("/{userId}/update-password")
+    public String updatePassword(
+            @PathVariable UUID userId,
+            @RequestParam String newpassword,
+            @RequestParam String confirmPassword
+    ) {
+        return userService.updatePassword(userId, newpassword, confirmPassword);
+    }
 }

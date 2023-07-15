@@ -22,9 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +36,6 @@ public class UserService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-
 
 
     public String save(UserRequestDto userRequestDto) {
@@ -82,6 +79,7 @@ public class UserService {
                 UserEntity user = userRepository.findById(userId)
                         .orElseThrow(() -> new DataNotFoundException("User Not Found"));
                 user.setState(UserState.ACTIVE);
+                entity.setActive(false);
                 userRepository.save(user);
                 return "Successfully Verified!";
             }
@@ -90,10 +88,69 @@ public class UserService {
         return "Wrong Verification Code!";
     }
 
+    public String forgottenPassword(UUID userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        VerificationEntity user = verificationRepository.findByUserId(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+        VerificationEntity verificationEntity = VerificationEntity.builder()
+                .userId(userEntity)
+                .code(generateVerificationCode())
+                .link("http://localhost:8080/user/api/v1/"+ userEntity.getId() +"/verify-code-for-update-password")
+                .isActive(true)
+                .build();
+
+        verificationRepository.save(verificationEntity);
+        return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
+    }
+
+    public String verifyPasswordForUpdatePassword (UUID userId,String code){
+        VerificationEntity entity = verificationRepository.findByUserId(userId)
+                .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
+
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found!"));
+
+        if (entity.getLink().endsWith("/update-password")) {
+            if (code.equals(entity.getCode())) {
+                if (entity.getCreatedDate().plusMinutes(2).isAfter(LocalDateTime.now())) {
+                    UserEntity user = userRepository.findById(userId)
+                            .orElseThrow(() -> new DataNotFoundException("User Not Found"));
+                    userRepository.save(user);
+                    VerificationEntity verificationEntity = VerificationEntity.builder()
+                            .userId(userEntity)
+                            .code(generateVerificationCode())
+                            .link("http://localhost:8080/user/api/v1/" + userEntity.getId() + "/update-password")
+                            .isActive(true)
+                            .build();
+                    return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
+                }
+                return "Verification Code has Expired!";
+            }
+            return "Wrong Verification Code!";
+        }
+        return "Verification Code not found";
+    }
+
+
+    public String updatePassword(UUID userId, String newPassword, String confirmPassword) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("This user not found"));
+
+        if (Objects.equals(newPassword, confirmPassword)) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            return "Password successfully changed";
+        }
+        return "the password did not match";
+    }
+
+
     private String generateVerificationCode() {
-        Random random = new Random(100000);
+        Random random = new Random(System.currentTimeMillis());
         return String.valueOf(random.nextInt(1000000));
     }
+
 
     private void checkUserEmail(String email) {
         if(userRepository.findByEmail(email).isPresent()) {

@@ -23,6 +23,11 @@ public class MailService {
         return sendMail(message, email, "/send-single");
     }
 
+    public String sendConfirmationCodeForUpdatePassword(String email, String confirmationCode, String link) {
+        String message = "Do not pass the code to anyone! Login confirmation code is "+ confirmationCode + "\nThis is link for update password "+link;
+        return sendMail(message, email, "/send-single");
+    }
+
     private String sendMail(String message, String email, String uri) {
         MailDto mailDto = new MailDto(message, email);
         HttpHeaders httpHeaders = new HttpHeaders();
