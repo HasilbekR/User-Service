@@ -27,6 +27,7 @@ public class UserController {
     ) {
         return userService.forgottenPassword(userId);
     }
+
     @GetMapping("/{userId}/verify-code-for-update-password")
     public String verifyCodeForUpdatePassword(
             @PathVariable UUID userId,
