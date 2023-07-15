@@ -84,6 +84,13 @@ public class UserService {
         return userRepository.save(userEntity);
     }
 
+    public void deleteUser(UUID userId){
+        if (userRepository.findById(userId).isEmpty()){
+            throw new DataNotFoundException("user not found!");
+        }
+        userRepository.deleteById(userId);
+    }
+
 
     public List<UserEntity> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
