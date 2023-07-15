@@ -40,9 +40,9 @@ public class UserController {
     @PutMapping("/{userId}/update-password")
     public String updatePassword(
             @PathVariable UUID userId,
-            @RequestParam String newpassword,
-            @RequestParam String confirmPassword
+            @RequestParam String confirmCode,
+            @RequestParam String newPassword
     ) {
-        return userService.updatePassword(userId, newpassword, confirmPassword);
+        return userService.updatePassword(userId,newPassword,confirmCode);
     }
 }
