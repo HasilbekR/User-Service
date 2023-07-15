@@ -16,7 +16,10 @@ import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.repository.VerificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,10 +56,9 @@ public class UserService {
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(save)
                 .code(generateVerificationCode())
-                .link("http://localhost:8080/user/api/v1/"+ save.getId() +"/verify")
+                .link("http://localhost:8081/"+ save.getId() +"/verify")
                 .isActive(true)
                 .build();
-        verificationRepository.save(verificationEntity);
         return mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
     }
     public JwtResponse signIn(LoginRequestDto loginRequestDto){
@@ -73,12 +75,31 @@ public class UserService {
         throw new AuthenticationFailedException("Incorrect username or password");
     }
 
+    public void deleteUser(UUID userId){
+        if (userRepository.deleteUserEntityById(userId).isEmpty()){
+            throw new UserBadRequestException("user not found");
+        }
+    }
+
+    public UserEntity updateProfile(UUID userId, UserRequestDto update){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new UserBadRequestException("user not found"));
+        modelMapper.map(update,userEntity);
+        return userRepository.save(userEntity);
+    }
+
+
+    public List<UserEntity> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable).getContent();
+    }
+
     public String verify(UUID userId,String code){
         VerificationEntity entity = verificationRepository.findByUserId(userId)
                 .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
 
         if (code.equals(entity.getCode())){
-            if (entity.getCreatedDate().plusMinutes(1).isAfter(LocalDateTime.now())){
+            if (entity.getCreatedDate().plusMinutes(1).isBefore(LocalDateTime.now())){
                 UserEntity user = userRepository.findById(userId)
                         .orElseThrow(() -> new DataNotFoundException("User Not Found"));
                 user.setState(UserState.ACTIVE);
