@@ -1,9 +1,12 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.domain.dto.request.UserRequestDto;
+import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -44,5 +47,29 @@ public class UserController {
             @RequestParam String newPassword
     ) {
         return userService.updatePassword(userId,newPassword,confirmCode);
+    }
+
+    @DeleteMapping("/{userId}/delete")
+    public String deleteUser(
+            @PathVariable UUID userId
+    ){
+        userService.deleteUser(userId);
+        return "Successfully deleted";
+    }
+
+    @PutMapping("/{userId}/update")
+    public UserEntity updateUpdateProfile(
+            @PathVariable UUID userId,
+            @RequestBody UserRequestDto update
+            ){
+       return userService.updateProfile(userId,update);
+    }
+
+    @GetMapping("/getAll")
+    public List<UserEntity> getAll(
+            @RequestParam(required = false) int page,
+            @RequestParam(required = false) int size
+    ){
+        return userService.getAll(page, size);
     }
 }
