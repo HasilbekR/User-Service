@@ -22,15 +22,15 @@ public class JwtService {
     private String secretKey;
 
     @Value("${jwt.access.expiry}")
-    private String accessTokenExpiry;
+    private Long accessTokenExpiry;
 
     @Value("${jwt.refresh.expiry}")
-    private String refreshTokenExpiry;
+    private Long refreshTokenExpiry;
 
     public String generateAccessToken(UserEntity userEntity){
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, secretKey)
-                .setSubject(userEntity.getEmail())
+                .setSubject(userEntity.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + accessTokenExpiry))
                 .addClaims(Map.of("roles", getRoles(userEntity.getAuthorities())))

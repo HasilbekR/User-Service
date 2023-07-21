@@ -55,7 +55,7 @@ public class UserService {
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(save)
                 .code(generateVerificationCode())
-                .link("http://localhost:8080/user/api/v1/"+ save.getId() +"/verify")
+                .link("http://localhost:8082/user/api/v1/"+ save.getId() +"/verify")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);
@@ -122,7 +122,7 @@ public class UserService {
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(userEntity)
                 .code(generateVerificationCode())
-                .link("http://localhost:8080/user/api/v1/"+ userEntity.getId() +"/verify-code-for-update-password")
+                .link("http://localhost:8082/user/api/v1/"+ userEntity.getId() +"/verify-code-for-update-password")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);
@@ -143,7 +143,7 @@ public class UserService {
                     VerificationEntity verificationEntity = VerificationEntity.builder()
                             .userId(userEntity)
                             .code(generateVerificationCode())
-                            .link("http://localhost:8080/user/api/v1/" + userEntity.getId() + "/update-password")
+                            .link("http://localhost:8082/user/api/v1/" + userEntity.getId() + "/update-password")
                             .isActive(true)
                             .build();
                     VerificationEntity expired = verificationRepository.findUserEntityByisActive(userId)

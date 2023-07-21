@@ -21,7 +21,7 @@ import java.util.List;
 public class AuthController {
     private final UserService userService;
 
-    @GetMapping("/sign-Up")
+    @PostMapping("/sign-Up")
     public ResponseEntity<String> signUp(
             @Valid @RequestBody UserRequestDto userDto,
             BindingResult bindingResult
