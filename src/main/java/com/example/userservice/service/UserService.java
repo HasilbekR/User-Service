@@ -23,7 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -46,16 +48,19 @@ public class UserService {
     public String save(UserRequestDto userRequestDto) {
         checkUserEmail(userRequestDto.getEmail());
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate dateOfBirth = LocalDate.parse(userRequestDto.getDateOfBirth(), formatter);
+
         UserEntity userEntity = modelMapper.map(userRequestDto, UserEntity.class);
         userEntity.setState(UserState.UNVERIFIED);
-        userEntity.setRoles(getRolesFromStrings(userRequestDto.getRoles()));
-        userEntity.setPermissions(getPermissionsFromStrings(userRequestDto.getPermissions()));
+        userEntity.setDateOfBirth(dateOfBirth);
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
         UserEntity save = userRepository.save(userEntity);
+
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(save)
                 .code(generateVerificationCode())
-                .link("http://localhost:8082/user/api/v1/"+ save.getId() +"/verify")
+                .link("http://localhost:8082/user/api/v1/" + save.getId() + "/verify")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);
@@ -63,10 +68,15 @@ public class UserService {
     }
 
 
-    public JwtResponse signIn(LoginRequestDto loginRequestDto){
+    public JwtResponse signIn(LoginRequestDto loginRequestDto) {
         UserEntity userEntity = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("Incorrect email or password"));
-        if(passwordEncoder.matches(loginRequestDto.getPassword(),userEntity.getPassword())){
+        if (userEntity.getState() == UserState.UNVERIFIED) {
+            throw new AuthenticationFailedException("Unverified account");
+        } else if (userEntity.getState() == UserState.BLOCKED) {
+            throw new AuthenticationFailedException("Your account is blocked. Please contact to admin@gmail.com for further information");
+        }
+        if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
             return JwtResponse.builder()
@@ -77,15 +87,16 @@ public class UserService {
         throw new AuthenticationFailedException("Incorrect username or password");
     }
 
-    public UserEntity updateProfile(UUID userId, UserRequestDto update){
+    public UserEntity updateProfile(UUID userId, UserRequestDto update) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new UserBadRequestException("user not found"));
-        modelMapper.map(update,userEntity);
+        modelMapper.map(update, userEntity);
+        userEntity.setUpdatedDate(LocalDateTime.now());
         return userRepository.save(userEntity);
     }
 
-    public void deleteUser(UUID userId){
-        if (userRepository.findById(userId).isEmpty()){
+    public void deleteUser(UUID userId) {
+        if (userRepository.findById(userId).isEmpty()) {
             throw new DataNotFoundException("user not found!");
         }
         userRepository.deleteById(userId);
@@ -97,12 +108,12 @@ public class UserService {
         return userRepository.findAll(pageable).getContent();
     }
 
-    public String verify(UUID userId,String code){
+    public String verify(UUID userId, String code) {
         VerificationEntity entity = verificationRepository.findByUserId(userId)
                 .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
 
-        if (code.equals(entity.getCode())){
-            if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())){
+        if (code.equals(entity.getCode())) {
+            if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
                 UserEntity user = userRepository.findById(userId)
                         .orElseThrow(() -> new DataNotFoundException("User Not Found"));
                 user.setState(UserState.ACTIVE);
@@ -110,7 +121,9 @@ public class UserService {
                 userRepository.save(user);
                 return "Successfully Verified!";
             }
-            return "Verification Code has Expired!";
+            entity.setActive(false);
+            verificationRepository.save(entity);
+            return "Verification code has expired!";
         }
         return "Wrong Verification Code!";
     }
@@ -122,7 +135,7 @@ public class UserService {
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(userEntity)
                 .code(generateVerificationCode())
-                .link("http://localhost:8082/user/api/v1/"+ userEntity.getId() +"/verify-code-for-update-password")
+                .link("http://localhost:8082/user/api/v1/" + userEntity.getId() + "/verify-code-for-update-password")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);
@@ -130,7 +143,7 @@ public class UserService {
         return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
     }
 
-    public String verifyPasswordForUpdatePassword (UUID userId,String code){
+    public String verifyPasswordForUpdatePassword(UUID userId, String code) {
         VerificationEntity entity = verificationRepository.findUserEntityByisActive(userId)
                 .orElseThrow(() -> new DataNotFoundException("Verification code doesn't exists or expired"));
 
@@ -138,26 +151,26 @@ public class UserService {
                 .orElseThrow(() -> new DataNotFoundException("User not found!"));
 
 
-            if (code.equals(entity.getCode())) {
-                if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
-                    VerificationEntity verificationEntity = VerificationEntity.builder()
-                            .userId(userEntity)
-                            .code(generateVerificationCode())
-                            .link("http://localhost:8082/user/api/v1/" + userEntity.getId() + "/update-password")
-                            .isActive(true)
-                            .build();
-                    VerificationEntity expired = verificationRepository.findUserEntityByisActive(userId)
-                            .orElseThrow(() -> new DataNotFoundException("Code not found"));
-                    expired.setActive(false);
-                    verificationRepository.save(expired);
-                    verificationRepository.save(verificationEntity);
-                    return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
-                }
-                entity.setActive(false);
-                verificationRepository.save(entity);
-                return "Verification Code has Expired!";
+        if (code.equals(entity.getCode())) {
+            if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
+                VerificationEntity verificationEntity = VerificationEntity.builder()
+                        .userId(userEntity)
+                        .code(generateVerificationCode())
+                        .link("http://localhost:8082/user/api/v1/" + userEntity.getId() + "/update-password")
+                        .isActive(true)
+                        .build();
+                VerificationEntity expired = verificationRepository.findUserEntityByisActive(userId)
+                        .orElseThrow(() -> new DataNotFoundException("Code not found"));
+                expired.setActive(false);
+                verificationRepository.save(expired);
+                verificationRepository.save(verificationEntity);
+                return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
             }
-            return "Wrong Verification Code!";
+            entity.setActive(false);
+            verificationRepository.save(entity);
+            return "Verification Code has Expired!";
+        }
+        return "Wrong Verification Code!";
     }
 
 
@@ -168,8 +181,8 @@ public class UserService {
         VerificationEntity verification = verificationRepository.findUserEntityByisActive(userId)
                 .orElseThrow(() -> new DataNotFoundException("Verification code expired or not found"));
 
-        if (verification.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())){
-            if (Objects.equals(verification.getCode(),confirmCode)){
+        if (verification.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
+            if (Objects.equals(verification.getCode(), confirmCode)) {
                 String encoded = passwordEncoder.encode(newPassword);
                 user.setPassword(encoded);
                 userRepository.save(user);
@@ -192,7 +205,7 @@ public class UserService {
 
 
     private void checkUserEmail(String email) {
-        if(userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new UserBadRequestException("email already exists");
         }
     }

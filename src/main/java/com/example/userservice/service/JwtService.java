@@ -33,7 +33,7 @@ public class JwtService {
                 .setSubject(userEntity.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + accessTokenExpiry))
-                .addClaims(Map.of("roles", getRoles(userEntity.getAuthorities())))
+                .addClaims(Map.of("authorities", getAuthorities(userEntity.getAuthorities())))
                 .compact();
     }
     public String generateRefreshToken(UserEntity userEntity){
@@ -47,8 +47,8 @@ public class JwtService {
     public Jws<Claims> extractToken(String token){
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
     }
-    private List<String> getRoles(Collection<? extends GrantedAuthority> roles){
-        return roles.stream()
+    private List<String> getAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
     }
