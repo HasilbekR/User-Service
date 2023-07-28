@@ -40,6 +40,13 @@ public class AuthController {
         return ResponseEntity.ok(userService.signIn(loginDto));
     }
 
+    @GetMapping("/access-token")
+    public ResponseEntity<JwtResponse> getAccessToken(
+            Principal principal
+    ) {
+        return ResponseEntity.ok(userService.getNewAccessToken(principal));
+    }
+
     @GetMapping("/refresh-token")
     public ResponseEntity<JwtResponse> refreshAccessToken(
             Principal principal
