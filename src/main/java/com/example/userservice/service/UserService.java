@@ -224,4 +224,10 @@ public class UserService {
         String accessToken = jwtService.generateAccessToken(userEntity);
         return JwtResponse.builder().accessToken(accessToken).build();
     }
+    public UserEntity findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
+    }
+    public UserEntity findById(UUID userId){
+        return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
+    }
 }
