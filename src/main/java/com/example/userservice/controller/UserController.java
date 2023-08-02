@@ -1,5 +1,6 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.domain.dto.request.UserBookingRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.UserService;
@@ -20,8 +21,8 @@ public class UserController {
     public String verify(
             @PathVariable UUID userId,
             @RequestParam String code
-    ){
-        return userService.verify(userId,code);
+    ) {
+        return userService.verify(userId, code);
     }
 
     @GetMapping("/forgotten-password")
@@ -35,8 +36,8 @@ public class UserController {
     public String verifyCodeForUpdatePassword(
             @PathVariable UUID userId,
             @RequestParam String code
-    ){
-        return userService.verifyPasswordForUpdatePassword(userId,code);
+    ) {
+        return userService.verifyPasswordForUpdatePassword(userId, code);
     }
 
 
@@ -46,13 +47,13 @@ public class UserController {
             @RequestParam String confirmCode,
             @RequestParam String newPassword
     ) {
-        return userService.updatePassword(userId,newPassword,confirmCode);
+        return userService.updatePassword(userId, newPassword, confirmCode);
     }
 
     @DeleteMapping("/{userId}/delete")
     public String deleteUser(
             @PathVariable UUID userId
-    ){
+    ) {
         userService.deleteUser(userId);
         return "Successfully deleted";
     }
@@ -61,15 +62,32 @@ public class UserController {
     public UserEntity updateUpdateProfile(
             @PathVariable UUID userId,
             @RequestBody UserRequestDto update
-            ){
-       return userService.updateProfile(userId,update);
+    ) {
+        return userService.updateProfile(userId, update);
     }
 
     @GetMapping("/getAll")
     public List<UserEntity> getAll(
             @RequestParam(required = false) int page,
             @RequestParam(required = false) int size
-    ){
+    ) {
         return userService.getAll(page, size);
+    }
+
+    @PostMapping("/getByEmail")
+    public String getByEmail(
+            @RequestBody UserBookingRequestDto userBookingRequestDto
+    ) {
+        UserEntity byEmail = userService.findByEmail(userBookingRequestDto.getSource());
+
+        return String.valueOf(byEmail.getId());
+    }
+
+    @PostMapping("/getById")
+    public String getById(
+            @RequestBody UserBookingRequestDto userBookingDto
+    ) {
+        UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
+        return user.getEmail();
     }
 }
