@@ -33,7 +33,7 @@ public class AuthController {
         return ResponseEntity.ok(userService.save(userDto));
     }
 
-    @GetMapping("/sign-In")
+    @PostMapping("/sign-In")
     public ResponseEntity<JwtResponse> signIn(
             @RequestBody LoginRequestDto loginDto
     ){
