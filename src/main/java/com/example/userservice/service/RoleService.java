@@ -3,21 +3,25 @@ package com.example.userservice.service;
 import com.example.userservice.domain.dto.request.RoleDto;
 import com.example.userservice.domain.entity.user.PermissionEntity;
 import com.example.userservice.domain.entity.user.RoleEntity;
+import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
 import com.example.userservice.exception.UniqueObjectException;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
+import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class RoleService {
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
 
     public RoleEntity save(RoleDto roleDto) {
@@ -95,4 +99,20 @@ public class RoleService {
         roleEntityByName.setUpdatedDate(LocalDateTime.now());
         return roleRepository.save(roleEntityByName);
     }
+
+    public void assignRoleToUser(String roleName, UUID userId) {
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleName)
+                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        List<RoleEntity> roles = new ArrayList<>(); // Use a mutable collection
+        roles.add(roleEntity);
+
+        user.setRoles(roles);
+        userRepository.save(user);
+    }
+
+
 }
