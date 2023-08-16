@@ -1,6 +1,6 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.domain.dto.request.UserBookingRequestDto;
+import com.example.userservice.domain.dto.request.UserDetailsRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.UserService;
@@ -76,16 +76,16 @@ public class UserController {
 
     @PostMapping("/getByEmail")
     public String getByEmail(
-            @RequestBody UserBookingRequestDto userBookingRequestDto
+            @RequestBody UserDetailsRequestDto userDetailsRequestDto
     ) {
-        UserEntity byEmail = userService.findByEmail(userBookingRequestDto.getSource());
+        UserEntity byEmail = userService.findByEmail(userDetailsRequestDto.getSource());
 
         return String.valueOf(byEmail.getId());
     }
 
     @PostMapping("/getById")
     public String getById(
-            @RequestBody UserBookingRequestDto userBookingDto
+            @RequestBody UserDetailsRequestDto userBookingDto
     ) {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
