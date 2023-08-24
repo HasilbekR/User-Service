@@ -6,9 +6,9 @@ spring:
     name: USER-SERVICE
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/user_service_db
-    username: postgres
-    password: 20229
+    url: jdbc:postgresql://hospital-db-do-user-14558489-0.b.db.ondigitalocean.com:25060/user_service_db
+    username: doadmin
+    password: AVNS_ZsEHpELLbPwTvabmXJN
   jpa:
     hibernate:
       ddl-auto: update

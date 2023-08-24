@@ -27,6 +27,10 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private String password;
     @Column(nullable = false)
     private LocalDate dateOfBirth;
+    @Column(nullable = false, unique = true)
+    private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     @ManyToMany(cascade = CascadeType.ALL)
     private List<RoleEntity> roles;
     @ManyToMany(cascade = CascadeType.ALL)

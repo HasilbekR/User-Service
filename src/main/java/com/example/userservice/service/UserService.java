@@ -46,7 +46,7 @@ public class UserService {
 
 
     public String save(UserRequestDto userRequestDto) {
-        checkUserEmail(userRequestDto.getEmail());
+        checkUserEmailAndPhoneNumber(userRequestDto.getEmail(), userRequestDto.getPhoneNumber());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate dateOfBirth = LocalDate.parse(userRequestDto.getDateOfBirth(), formatter);
@@ -204,9 +204,12 @@ public class UserService {
     }
 
 
-    private void checkUserEmail(String email) {
+    private void checkUserEmailAndPhoneNumber(String email, String phoneNumber) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new UserBadRequestException("email already exists");
+        }
+        if (userRepository.findUserEntityByPhoneNumber(phoneNumber).isPresent()) {
+            throw new UserBadRequestException("phone number already exists");
         }
     }
 
