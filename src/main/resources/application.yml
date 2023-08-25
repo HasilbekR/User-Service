@@ -19,6 +19,8 @@ spring:
 
 services:
   notification-url: http://NOTIFICATION-SERVICE/notification
+  create-time-slots: http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/create-time-slots
+
 
 eureka:
   client:
