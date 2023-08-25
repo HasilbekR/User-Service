@@ -59,11 +59,10 @@ public class UserService {
         RoleEntity roleEntity = roleService.save(roleDto);
         userEntity.setRoles(List.of(roleEntity));
         userEntity.setPermissions(List.of(roleEntity.getPermissions().toArray(new PermissionEntity[0])));
-        Gender gender = Gender.valueOf(userRequestDto.getGender());
-        if(!(gender == Gender.MALE || gender == Gender.FEMALE)){
+        if(!(Objects.equals(userRequestDto.getGender(), "MALE") || Objects.equals(userRequestDto.getGender(), "FEMALE"))){
             throw new DataNotFoundException("Gender not found");
         }
-        userEntity.setGender(gender);
+        userEntity.setGender(Gender.valueOf(userRequestDto.getGender()));
         UserEntity save = userRepository.save(userEntity);
 
         VerificationEntity verificationEntity = VerificationEntity.builder()
