@@ -1,7 +1,7 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.RoleDto;
-import com.example.userservice.domain.entity.user.RoleEntity;
+import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.RoleService;

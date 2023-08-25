@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @Repository
 public interface VerificationRepository extends JpaRepository<VerificationEntity, UUID> {
-    @Query(value = "select v from verification v where v.userId.id = ?1")
-    Optional<VerificationEntity> findByUserId(UUID userId);
+    @Query(value = "select v from verification v where v.userId.email = ?1")
+    Optional<VerificationEntity> findByUserEmail(String email);
 
     @Query(value = "select v from verification v where v.userId.id = ?1 and v.isActive = true")
     Optional<VerificationEntity> findUserEntityByisActive(UUID userId);

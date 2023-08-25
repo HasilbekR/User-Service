@@ -1,12 +1,22 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.UserDetailsRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
+import com.example.userservice.domain.entity.doctor.DoctorAvailability;
+import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
+import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,14 +26,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-
-    @GetMapping("/{userId}/verify")
-    public String verify(
-            @PathVariable UUID userId,
-            @RequestParam String code
-    ) {
-        return userService.verify(userId, code);
-    }
+    private final DoctorService doctorService;
 
     @GetMapping("/forgotten-password")
     public String forgottenPassword(
@@ -90,4 +93,49 @@ public class UserController {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
     }
+
+    @PostMapping("/addDoctor")
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResponseEntity<UserEntity> addDoctor(
+            @Valid @RequestBody DoctorCreateDto drCreateDto,
+            BindingResult bindingResult
+    ){
+        return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult));
+    }
+    @GetMapping("/get/all")
+    public ResponseEntity<List<UserEntity>> getAll(
+            @RequestParam(required = false,defaultValue = "0") int page,
+            @RequestParam(required = false,defaultValue = "10") int size,
+            @RequestParam UUID hospitalId
+    ){
+        return ResponseEntity.ok(doctorService.getAllDoctor(page,size, hospitalId));
+    }
+
+    @PutMapping("/changeStatus")
+    @PreAuthorize(value = "hasAnyRole('DOCTOR','ADMIN')")
+    public ResponseEntity<HttpStatus> changeStatus(
+            @RequestParam UUID drId,
+            @RequestParam String status
+    ){
+        return ResponseEntity.ok(doctorService.updateDoctorStatus(drId, DoctorStatus.valueOf(status)));
+    }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResponseEntity<HttpStatus> delete(
+            @RequestParam UUID doctorId
+    ){
+        return ResponseEntity.ok(doctorService.deleteDoctorFromHospital(doctorId));
+    }
+
+    @PostMapping("/set-availability")
+    @PreAuthorize(value = "hasRole('DOCTOR')")
+    public ResponseEntity<String>  setAvailability(
+            @Valid @RequestBody DoctorAvailability doctorAvailability,
+            Principal principal,
+            BindingResult bindingResult
+    ){
+        return doctorService.setAvailability(doctorAvailability,principal,bindingResult);
+    }
+
 }

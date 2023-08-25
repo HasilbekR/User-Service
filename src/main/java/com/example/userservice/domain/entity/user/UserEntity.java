@@ -1,6 +1,9 @@
 package com.example.userservice.domain.entity.user;
 
 import com.example.userservice.domain.entity.BaseEntity;
+import com.example.userservice.domain.entity.doctor.DoctorInfo;
+import com.example.userservice.domain.entity.role.PermissionEntity;
+import com.example.userservice.domain.entity.role.RoleEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +40,8 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private List<PermissionEntity> permissions;
     @Enumerated(EnumType.STRING)
     private UserState state;
+    @OneToOne
+    private DoctorInfo doctorInfo;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
