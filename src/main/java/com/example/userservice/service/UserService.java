@@ -7,6 +7,7 @@ import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
+import com.example.userservice.domain.entity.user.Gender;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.domain.entity.user.UserState;
 import com.example.userservice.exception.AuthenticationFailedException;
@@ -58,6 +59,11 @@ public class UserService {
         RoleEntity roleEntity = roleService.save(roleDto);
         userEntity.setRoles(List.of(roleEntity));
         userEntity.setPermissions(List.of(roleEntity.getPermissions().toArray(new PermissionEntity[0])));
+        Gender gender = Gender.valueOf(userRequestDto.getGender());
+        if(!(gender == Gender.MALE || gender == Gender.FEMALE)){
+            throw new DataNotFoundException("Gender not found");
+        }
+        userEntity.setGender(gender);
         UserEntity save = userRepository.save(userEntity);
 
         VerificationEntity verificationEntity = VerificationEntity.builder()
