@@ -27,10 +27,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -126,23 +123,26 @@ public class UserService {
                 user.setState(UserState.ACTIVE);
                 entity.setActive(false);
                 userRepository.save(user);
+                verificationRepository.delete(entity);
                 return "Successfully Verified!";
             }
-            entity.setActive(false);
-            verificationRepository.save(entity);
+            verificationRepository.delete(entity);
             return "Verification code has expired!";
         }
         return "Wrong Verification Code!";
     }
 
-    public String forgottenPassword(UUID userId) {
-        UserEntity userEntity = userRepository.findById(userId)
+    public String forgottenPassword(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
-
+        Optional<VerificationEntity> byUserEmail = verificationRepository.findByUserEmail(email);
+        if(byUserEmail.isPresent()){
+            verificationRepository.delete(byUserEmail.orElseThrow());
+        }
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(userEntity)
                 .code(generateVerificationCode())
-                .link("http://localhost:8082/user/api/v1/" + userEntity.getId() + "/verify-code-for-update-password")
+//                .link("http://138.68.144.123:8080/user" + userEntity.getId() + "/verify-code-for-update-password")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);

@@ -30,9 +30,9 @@ public class UserController {
 
     @GetMapping("/forgotten-password")
     public String forgottenPassword(
-            @RequestParam UUID userId
+            @RequestParam String email
     ) {
-        return userService.forgottenPassword(userId);
+        return userService.forgottenPassword(email);
     }
 
     @GetMapping("/{userId}/verify-code-for-update-password")
