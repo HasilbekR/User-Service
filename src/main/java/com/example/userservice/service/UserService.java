@@ -1,11 +1,12 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.LoginRequestDto;
+import com.example.userservice.domain.dto.request.RoleDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
-import com.example.userservice.domain.entity.user.PermissionEntity;
-import com.example.userservice.domain.entity.user.RoleEntity;
+import com.example.userservice.domain.entity.role.PermissionEntity;
+import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.domain.entity.user.UserState;
 import com.example.userservice.exception.AuthenticationFailedException;
@@ -43,6 +44,7 @@ public class UserService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
 
     public String save(UserRequestDto userRequestDto) {
@@ -55,12 +57,16 @@ public class UserService {
         userEntity.setState(UserState.UNVERIFIED);
         userEntity.setDateOfBirth(dateOfBirth);
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
+        RoleDto roleDto = RoleDto.builder().name("USER").permissions(List.of("GET", "UPDATE","DELETE")).build();
+        RoleEntity roleEntity = roleService.save(roleDto);
+        userEntity.setRoles(List.of(roleEntity));
+        userEntity.setPermissions(List.of(roleEntity.getPermissions().toArray(new PermissionEntity[0])));
         UserEntity save = userRepository.save(userEntity);
 
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(save)
                 .code(generateVerificationCode())
-                .link("http://localhost:8082/user/api/v1/" + save.getId() + "/verify")
+//                .link("http://localhost:8082/user/api/v1/" + save.getId() + "/verify")
                 .isActive(true)
                 .build();
         verificationRepository.save(verificationEntity);
@@ -71,11 +77,12 @@ public class UserService {
     public JwtResponse signIn(LoginRequestDto loginRequestDto) {
         UserEntity userEntity = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("Incorrect email or password"));
-        if (userEntity.getState() == UserState.UNVERIFIED) {
-            throw new AuthenticationFailedException("Unverified account");
-        } else if (userEntity.getState() == UserState.BLOCKED) {
+        if (userEntity.getState() == UserState.BLOCKED) {
             throw new AuthenticationFailedException("Your account is blocked. Please contact to admin@gmail.com for further information");
         }
+//        else if (userEntity.getState() == UserState.UNVERIFIED) {
+//            throw new AuthenticationFailedException("Unverified account");
+//        }
         if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
@@ -108,13 +115,13 @@ public class UserService {
         return userRepository.findAll(pageable).getContent();
     }
 
-    public String verify(UUID userId, String code) {
-        VerificationEntity entity = verificationRepository.findByUserId(userId)
+    public String verify(Principal principal, String code) {
+        VerificationEntity entity = verificationRepository.findByUserEmail(principal.getName())
                 .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
 
-        if (code.equals(entity.getCode())) {
+        if (code.equals(entity.getCode()) && entity.isActive()) {
             if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
-                UserEntity user = userRepository.findById(userId)
+                UserEntity user = userRepository.findByEmail(principal.getName())
                         .orElseThrow(() -> new DataNotFoundException("User Not Found"));
                 user.setState(UserState.ACTIVE);
                 entity.setActive(false);
@@ -173,7 +180,6 @@ public class UserService {
         return "Wrong Verification Code!";
     }
 
-
     public String updatePassword(UUID userId, String newPassword, String confirmCode) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("This user not found"));
@@ -197,12 +203,10 @@ public class UserService {
         return "Verification Code Expired";
     }
 
-
     private String generateVerificationCode() {
         Random random = new Random(System.currentTimeMillis());
         return String.valueOf(random.nextInt(1000000));
     }
-
 
     private void checkUserEmailAndPhoneNumber(String email, String phoneNumber) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -211,14 +215,6 @@ public class UserService {
         if (userRepository.findUserEntityByPhoneNumber(phoneNumber).isPresent()) {
             throw new UserBadRequestException("phone number already exists");
         }
-    }
-
-    private List<PermissionEntity> getPermissionsFromStrings(List<String> permissions) {
-        return permissionRepository.findPermissionEntitiesByPermissionIn(permissions);
-    }
-
-    private List<RoleEntity> getRolesFromStrings(List<String> roles) {
-        return roleRepository.findRoleEntitiesByNameIn(roles);
     }
 
     public JwtResponse getNewAccessToken(Principal principal) {

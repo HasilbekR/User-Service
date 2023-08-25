@@ -1,4 +1,4 @@
-package com.example.userservice.domain.entity.user;
+package com.example.userservice.domain.entity.role;
 
 import com.example.userservice.domain.entity.BaseEntity;
 import jakarta.persistence.Entity;

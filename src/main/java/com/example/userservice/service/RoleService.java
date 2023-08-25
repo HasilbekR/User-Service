@@ -1,8 +1,8 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.RoleDto;
-import com.example.userservice.domain.entity.user.PermissionEntity;
-import com.example.userservice.domain.entity.user.RoleEntity;
+import com.example.userservice.domain.entity.role.PermissionEntity;
+import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
 import com.example.userservice.exception.UniqueObjectException;

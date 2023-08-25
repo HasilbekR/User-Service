@@ -1,6 +1,6 @@
 package com.example.userservice.repository;
 
-import com.example.userservice.domain.entity.user.PermissionEntity;
+import com.example.userservice.domain.entity.role.PermissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

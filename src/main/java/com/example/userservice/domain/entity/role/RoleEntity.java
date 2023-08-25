@@ -1,4 +1,4 @@
-package com.example.userservice.domain.entity.user;
+package com.example.userservice.domain.entity.role;
 
 import com.example.userservice.domain.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 public class RoleEntity extends BaseEntity {
     private String name;
-
     @ManyToMany
     private List<PermissionEntity> permissions;
 }
