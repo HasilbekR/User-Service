@@ -45,7 +45,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/sign-in")
+    @PostMapping("/sign-in")
     public ResponseEntity<JwtResponse> signIn(
             @RequestBody LoginRequestDto loginDto
     ){
