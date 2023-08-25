@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user/api/v1")
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -53,7 +53,7 @@ public class UserController {
         return userService.updatePassword(userId, newPassword, confirmCode);
     }
 
-    @DeleteMapping("/{userId}/delete")
+    @DeleteMapping("/{userId}/delete-user")
     public String deleteUser(
             @PathVariable UUID userId
     ) {
@@ -61,7 +61,7 @@ public class UserController {
         return "Successfully deleted";
     }
 
-    @PutMapping("/{userId}/update")
+    @PutMapping("/{userId}/update-user")
     public UserEntity updateUpdateProfile(
             @PathVariable UUID userId,
             @RequestBody UserRequestDto update
@@ -69,7 +69,7 @@ public class UserController {
         return userService.updateProfile(userId, update);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/get-all-user")
     public List<UserEntity> getAll(
             @RequestParam(required = false) int page,
             @RequestParam(required = false) int size
@@ -86,15 +86,14 @@ public class UserController {
         return String.valueOf(byEmail.getId());
     }
 
-    @PostMapping("/getById")
+    @GetMapping("/getById")
     public String getById(
             @RequestBody UserDetailsRequestDto userBookingDto
     ) {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
     }
-
-    @PostMapping("/addDoctor")
+    @PostMapping("/add-doctor")
     @PreAuthorize(value = "hasRole('ADMIN')")
     public ResponseEntity<UserEntity> addDoctor(
             @Valid @RequestBody DoctorCreateDto drCreateDto,
@@ -102,7 +101,7 @@ public class UserController {
     ){
         return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult));
     }
-    @GetMapping("/get/all")
+    @GetMapping("/get-all-doctors-hospital")
     public ResponseEntity<List<UserEntity>> getAll(
             @RequestParam(required = false,defaultValue = "0") int page,
             @RequestParam(required = false,defaultValue = "10") int size,
@@ -111,7 +110,7 @@ public class UserController {
         return ResponseEntity.ok(doctorService.getAllDoctor(page,size, hospitalId));
     }
 
-    @PutMapping("/changeStatus")
+    @PutMapping("/change-doctor-status")
     @PreAuthorize(value = "hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<HttpStatus> changeStatus(
             @RequestParam UUID drId,
@@ -120,7 +119,7 @@ public class UserController {
         return ResponseEntity.ok(doctorService.updateDoctorStatus(drId, DoctorStatus.valueOf(status)));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete-doctor-from-hospital")
     @PreAuthorize(value = "hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> delete(
             @RequestParam UUID doctorId
@@ -128,7 +127,7 @@ public class UserController {
         return ResponseEntity.ok(doctorService.deleteDoctorFromHospital(doctorId));
     }
 
-    @PostMapping("/set-availability")
+    @PostMapping("/set-doctor-availability")
     @PreAuthorize(value = "hasRole('DOCTOR')")
     public ResponseEntity<String>  setAvailability(
             @Valid @RequestBody DoctorAvailability doctorAvailability,
