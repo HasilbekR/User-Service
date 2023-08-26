@@ -100,14 +100,14 @@ public class RoleService {
         return roleRepository.save(roleEntityByName);
     }
 
-    public void assignRoleToUser(String roleName, UUID userId) {
+    public void assignRoleToUser(String roleName, String email) {
         RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleName)
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
 
-        UserEntity user = userRepository.findById(userId)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
-        List<RoleEntity> roles = new ArrayList<>(); // Use a mutable collection
+        List<RoleEntity> roles = user.getRoles();
         roles.add(roleEntity);
 
         user.setRoles(roles);

@@ -23,7 +23,7 @@ public class RoleController {
     private final RoleService roleService;
     private final UserService userService;
     @PostMapping("/create")
-    public RoleEntity createRole(
+    public ResponseEntity<RoleEntity> createRole(
             @Valid @RequestBody RoleDto roleDto,
             BindingResult bindingResult
             )throws RequestValidationException {
@@ -31,38 +31,38 @@ public class RoleController {
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             throw new RequestValidationException(allErrors);
         }
-        return roleService.save(roleDto);
+        return ResponseEntity.ok(roleService.save(roleDto));
     }
 
     @DeleteMapping("/delete")
-    public String deleteRole(
+    public ResponseEntity<String> deleteRole(
             @RequestParam String name
     ){
         roleService.delete(name);
-        return "successfully deleted";
+        return ResponseEntity.ok("successfully deleted");
     }
     @GetMapping("/get-role")
-    public RoleEntity getRole(
+    public ResponseEntity<RoleEntity> getRole(
             @RequestParam String name
     ){
-        return roleService.getRole(name);
+        return ResponseEntity.ok(roleService.getRole(name));
     }
 
     @PutMapping("/update")
-    public RoleEntity update(
+    public ResponseEntity<RoleEntity> update(
             @RequestParam String name,
             @RequestBody RoleDto roleDto
     ){
-        return roleService.update(roleDto, name);
+        return ResponseEntity.ok(roleService.update(roleDto, name));
     }
 
     @PostMapping("/assign-role-to-user")
     public ResponseEntity<String> assignRoleToUser(
             @RequestParam String roleName,
-            @RequestParam UUID userId
+            @RequestParam String email
     ) {
-        UserEntity user = userService.findById(userId);
-        roleService.assignRoleToUser(roleName, userId);
+        UserEntity user = userService.findByEmail(email);
+        roleService.assignRoleToUser(roleName, email);
         return ResponseEntity.ok("Role successfully assigned to " + user.getUsername());
     }
 }
