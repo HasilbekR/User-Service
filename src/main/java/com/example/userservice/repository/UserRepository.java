@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByEmail(String email);
     Optional<UserEntity> findUserEntityByPhoneNumber(String phoneNumber);
-    @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.doctorInfo.hospitalId = ?1")
+    @Query(value = "select u from users u left join u.roles r left join u.doctorInfo d where r.name = 'DOCTOR' and (d is null or d.hospitalId = ?1)")
     Page<UserEntity> getAllDoctorsFromHospital(UUID hospitalId, Pageable pageable);
     @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.email = ?1")
     Optional<UserEntity> getDoctorByEmail(String email);
