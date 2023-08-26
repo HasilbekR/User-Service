@@ -2,6 +2,11 @@ server:
   port: 8082
 
 spring:
+  devtools:
+    remote:
+      debug:
+        enabled: true
+        local-port: 5005
   application:
     name: USER-SERVICE
   datasource:
@@ -16,6 +21,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
 
 services:
   notification-url: http://NOTIFICATION-SERVICE/notification
