@@ -1,12 +1,6 @@
 server:
   port: 8082
 
-spring:
-  devtools:
-    remote:
-      debug:
-        enabled: true
-        local-port: 5005
   application:
     name: USER-SERVICE
   datasource:
@@ -38,8 +32,8 @@ eureka:
 
 jwt:
   secret:
-    key: 753778214125442A472D4B6150645367566B59703373367639792F423F452848
+    key: 60wZC33q0IUUvqg62BY61Tvd4ZeotN8lwTbPwqkPB8a065GJ1f0B2matzuGkQ2maST65wq2I8X-q_ODNaZ8WkA
   access:
-    expiry: 3000000
+    expiry: 86,400,000
   refresh:
-    expiry: 300000000
+    expiry: 604,800,000
