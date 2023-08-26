@@ -73,7 +73,7 @@ public class DoctorService {
         return userRepository.save(user);
     }
     public List<UserEntity> getAllDoctor(int page,int size, UUID hospitalId){
-        Sort sort = Sort.by(Sort.Direction.ASC,"status");
+        Sort sort = Sort.by(Sort.Direction.ASC, "fullName");
         Pageable pageable = PageRequest.of(page,size,sort);
         List<UserEntity> userEntities = userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
         List<UserEntity> doctors = new ArrayList<>();
