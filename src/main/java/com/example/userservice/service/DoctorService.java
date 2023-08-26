@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,16 +72,9 @@ public class DoctorService {
         return userRepository.save(user);
     }
     public List<UserEntity> getAllDoctor(int page,int size, UUID hospitalId){
-        Sort sort = Sort.by(Sort.Direction.ASC, "fullName");
+        Sort sort = Sort.by(Sort.Direction.ASC,"fullName");
         Pageable pageable = PageRequest.of(page,size,sort);
-        List<UserEntity> userEntities = userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
-        List<UserEntity> doctors = new ArrayList<>();
-        for (UserEntity userEntity : userEntities) {
-            if(userEntity.getDoctorInfo().getHospitalId().equals(hospitalId)){
-                doctors.add(userEntity);
-            }
-        }
-        return doctors;
+        return userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
     }
     public HttpStatus updateDoctorStatus(UUID drId, DoctorStatus status) {
         userRepository.getDoctorById(drId).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
