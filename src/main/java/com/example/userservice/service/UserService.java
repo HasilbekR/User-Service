@@ -2,6 +2,7 @@ package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.LoginRequestDto;
 import com.example.userservice.domain.dto.request.RoleDto;
+import com.example.userservice.domain.dto.request.UserDetailsRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
@@ -45,7 +46,7 @@ public class UserService {
     private final RoleService roleService;
 
 
-    public String save(UserRequestDto userRequestDto) {
+    public UserEntity save(UserRequestDto userRequestDto) {
         checkUserEmailAndPhoneNumber(userRequestDto.getEmail(), userRequestDto.getPhoneNumber());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -63,16 +64,7 @@ public class UserService {
             throw new DataNotFoundException("Gender not found");
         }
         userEntity.setGender(Gender.valueOf(userRequestDto.getGender()));
-        UserEntity save = userRepository.save(userEntity);
-
-        VerificationEntity verificationEntity = VerificationEntity.builder()
-                .userId(save)
-                .code(generateVerificationCode())
-//                .link("http://localhost:8082/user/api/v1/" + save.getId() + "/verify")
-                .isActive(true)
-                .build();
-        verificationRepository.save(verificationEntity);
-        return mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
+        return userRepository.save(userEntity);
     }
 
 
@@ -82,15 +74,13 @@ public class UserService {
         if (userEntity.getState() == UserState.BLOCKED) {
             throw new AuthenticationFailedException("Your account is blocked. Please contact to admin@gmail.com for further information");
         }
-//        else if (userEntity.getState() == UserState.UNVERIFIED) {
-//            throw new AuthenticationFailedException("Unverified account");
-//        }
         if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
             return JwtResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .userEntity(userEntity)
                     .build();
         }
         throw new AuthenticationFailedException("Incorrect username or password");
@@ -116,6 +106,16 @@ public class UserService {
         Pageable pageable = PageRequest.of(page, size);
         return userRepository.findAll(pageable).getContent();
     }
+    public void sendVerificationCode(String email){
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
+        VerificationEntity verificationEntity = VerificationEntity.builder()
+                .userId(userEntity)
+                .code(generateVerificationCode())
+                .isActive(true)
+                .build();
+        verificationRepository.save(verificationEntity);
+        mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
+    }
 
     public String verify(Principal principal, String code) {
         VerificationEntity entity = verificationRepository.findByUserEmail(principal.getName())
@@ -137,22 +137,14 @@ public class UserService {
         return "Wrong Verification Code!";
     }
 
-    public String forgottenPassword(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email)
+    public void forgottenPassword(UserDetailsRequestDto email) {
+        UserEntity userEntity = userRepository.findByEmail(email.getSource())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
-        Optional<VerificationEntity> byUserEmail = verificationRepository.findByUserEmail(email);
+        Optional<VerificationEntity> byUserEmail = verificationRepository.findByUserEmail(email.getSource());
         if(byUserEmail.isPresent()){
             verificationRepository.delete(byUserEmail.orElseThrow());
         }
-        VerificationEntity verificationEntity = VerificationEntity.builder()
-                .userId(userEntity)
-                .code(generateVerificationCode())
-//                .link("http://138.68.144.123:8080/user" + userEntity.getId() + "/verify-code-for-update-password")
-                .isActive(true)
-                .build();
-        verificationRepository.save(verificationEntity);
-
-        return mailService.sendConfirmationCodeForUpdatePassword(userEntity.getEmail(), verificationEntity.getCode(), verificationEntity.getLink());
+        sendVerificationCode(email.getSource());
     }
 
     public String verifyPasswordForUpdatePassword(UUID userId, String code) {

@@ -4,7 +4,6 @@ import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.LoginRequestDto;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.dto.response.JwtResponse;
-import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.DoctorService;
@@ -29,7 +28,7 @@ public class AuthController {
 
 
     @PostMapping("/sign-up")
-    public ResponseEntity<StandardResponse<String>> signUp(
+    public ResponseEntity<UserEntity> signUp(
             @Valid @RequestBody UserRequestDto userDto,
             BindingResult bindingResult
     ) throws RequestValidationException {
@@ -37,12 +36,7 @@ public class AuthController {
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             throw new RequestValidationException(allErrors);
         }
-        String save = userService.save(userDto);
-        StandardResponse<String> response = new StandardResponse<>();
-        response.setStatus("success");
-        response.setMessage("User registered successfully.");
-        response.setData(save);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.save(userDto));
     }
 
     @PostMapping("/sign-in")
@@ -52,11 +46,17 @@ public class AuthController {
         return ResponseEntity.ok(userService.signIn(loginDto));
     }
     @GetMapping("/verify")
-    public String verify(
+    public ResponseEntity<String> verify(
             @RequestParam String code,
             Principal principal
     ) {
-        return userService.verify(principal, code);
+        return ResponseEntity.ok(userService.verify(principal, code));
+    }
+    @GetMapping("/send-verification-code")
+    public void sendVerificationCode(
+            Principal principal
+    ){
+        userService.sendVerificationCode(principal.getName());
     }
     @GetMapping("/access-token")
     public ResponseEntity<JwtResponse> getAccessToken(

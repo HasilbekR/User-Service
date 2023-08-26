@@ -29,10 +29,10 @@ public class UserController {
     private final DoctorService doctorService;
 
     @GetMapping("/forgotten-password")
-    public String forgottenPassword(
-            @RequestParam String email
+    public void forgottenPassword(
+            @RequestBody UserDetailsRequestDto email
     ) {
-        return userService.forgottenPassword(email);
+        userService.forgottenPassword(email);
     }
 
     @GetMapping("/{userId}/verify-code-for-update-password")
