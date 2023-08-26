@@ -93,14 +93,6 @@ public class UserController {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
     }
-    @PostMapping("/add-doctor")
-    @PreAuthorize(value = "hasRole('ADMIN')")
-    public ResponseEntity<UserEntity> addDoctor(
-            @Valid @RequestBody DoctorCreateDto drCreateDto,
-            BindingResult bindingResult
-    ){
-        return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult));
-    }
     @GetMapping("/get-all-doctors-hospital")
     public ResponseEntity<List<UserEntity>> getAll(
             @RequestParam(required = false,defaultValue = "0") int page,
@@ -136,5 +128,11 @@ public class UserController {
     ){
         return doctorService.setAvailability(doctorAvailability,principal,bindingResult);
     }
-
+    @GetMapping("/getDoctorById")
+    public ResponseEntity<UserEntity> getDocById(
+            @RequestParam UUID id
+    ) {
+        UserEntity user = userService.findDocById(id);
+        return ResponseEntity.ok(user);
+    }
 }

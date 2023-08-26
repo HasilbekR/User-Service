@@ -226,4 +226,7 @@ public class UserService {
     public UserEntity findById(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
     }
+    public UserEntity findDocById(UUID userId){
+        return userRepository.getDoctorById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
+    }
 }
