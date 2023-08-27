@@ -3,7 +3,6 @@ package com.example.userservice.controller;
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.exception.RequestValidationException;
-import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
-    private final DoctorService doctorService;
-
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserDetailsForFront> signUp(

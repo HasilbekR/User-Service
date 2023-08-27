@@ -75,7 +75,7 @@ public class UserController {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
     }
-    @GetMapping("/get-all-doctors-hospital")
+    @GetMapping("/get-all-doctors-from-hospital")
     public ResponseEntity<List<UserEntity>> getAll(
             @RequestParam(required = false,defaultValue = "0") int page,
             @RequestParam(required = false,defaultValue = "10") int size,
@@ -94,7 +94,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete-doctor-from-hospital")
-    @PreAuthorize(value = "hasRole('ADMIN')")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public ResponseEntity<HttpStatus> delete(
             @RequestParam String email
     ){
