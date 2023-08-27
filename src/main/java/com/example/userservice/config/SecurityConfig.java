@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
-    private final String[] permitAll = {"/swagger-ui/**", "/v3/api-docs/**", "/user/api/v1/auth/**", "/user/api/v1/role/**"};
+    private final String[] permitAll = {"/swagger-ui/**", "/v3/api-docs/**", "/user/auth/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

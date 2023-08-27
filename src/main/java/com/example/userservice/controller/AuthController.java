@@ -1,18 +1,13 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.domain.dto.request.DoctorCreateDto;
-import com.example.userservice.domain.dto.request.LoginRequestDto;
-import com.example.userservice.domain.dto.request.UserDetailsForFront;
-import com.example.userservice.domain.dto.request.UserRequestDto;
+import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
-import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
@@ -72,13 +67,24 @@ public class AuthController {
     ){
         return ResponseEntity.ok(userService.getNewAccessToken(principal));
     }
+    @GetMapping("/forgot-password")
+    public void forgottenPassword(
+            @RequestParam String email
+    ) {
+        userService.forgottenPassword(email);
+    }
 
-    @PostMapping("/add-doctor")
-    @PreAuthorize(value = "hasRole('ADMIN')")
-    public ResponseEntity<UserEntity> addDoctor(
-            @Valid @RequestBody DoctorCreateDto drCreateDto,
-            BindingResult bindingResult
-    ){
-        return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult));
+    @PostMapping("/verify-code-for-update-password")
+    public ResponseEntity<String> verifyCodeForUpdatePassword(
+            @RequestBody VerifyCodeDto verifyCodeDto
+    ) {
+        return ResponseEntity.ok(userService.verifyPasswordForUpdatePassword(verifyCodeDto));
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<String> updatePassword(
+            @RequestBody UpdatePasswordDto updatePasswordDto
+    ) {
+        return ResponseEntity.ok(userService.updatePassword(updatePasswordDto));
     }
 }

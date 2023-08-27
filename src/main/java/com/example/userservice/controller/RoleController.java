@@ -1,18 +1,20 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.domain.dto.request.RoleDto;
+import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
+import com.example.userservice.domain.dto.request.role.RoleAssignDto;
+import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.entity.role.RoleEntity;
-import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.RoleService;
-import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -20,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;
-    private final UserService userService;
     @PostMapping("/create")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public ResponseEntity<RoleEntity> createRole(
             @Valid @RequestBody RoleDto roleDto,
             BindingResult bindingResult
@@ -33,35 +35,37 @@ public class RoleController {
         return ResponseEntity.ok(roleService.save(roleDto));
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteRole(
-            @RequestParam String name
-    ){
-        roleService.delete(name);
-        return ResponseEntity.ok("successfully deleted");
-    }
     @GetMapping("/get-role")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN' or 'ADMIN')")
     public ResponseEntity<RoleEntity> getRole(
             @RequestParam String name
     ){
         return ResponseEntity.ok(roleService.getRole(name));
     }
 
-    @PutMapping("/update")
+    @PutMapping("/add-permissions-to-role")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public ResponseEntity<RoleEntity> update(
-            @RequestParam String name,
             @RequestBody RoleDto roleDto
     ){
-        return ResponseEntity.ok(roleService.update(roleDto, name));
+        return ResponseEntity.ok(roleService.update(roleDto));
     }
 
     @PostMapping("/assign-role-to-user")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public ResponseEntity<String> assignRoleToUser(
-            @RequestParam String roleName,
-            @RequestParam String email
+            @RequestBody RoleAssignDto roleAssignDto,
+            Principal principal
     ) {
-        UserEntity user = userService.findByEmail(email);
-        roleService.assignRoleToUser(roleName, email);
-        return ResponseEntity.ok("Role successfully assigned to " + user.getUsername());
+        return ResponseEntity.ok("Role successfully assigned to " + roleService.assignRoleToUser(roleAssignDto, principal));
+    }
+
+    @PostMapping("/assign-hospital")
+    @PreAuthorize(value = "hasRole('OWNER')")
+    public ResponseEntity<String> assignHospital(
+            @RequestBody HospitalAssignDto hospitalAssignDto
+            ){
+        roleService.assignHospital(hospitalAssignDto);
+        return ResponseEntity.ok("Successfully assigned hospital");
     }
 }

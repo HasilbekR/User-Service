@@ -48,7 +48,7 @@ public class DoctorService {
     private String createTimeSlots;
 
 
-    public UserEntity saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult){
+    public UserEntity saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult,Principal principal){
         if (bindingResult.hasErrors()) {
             List<ObjectError> errors = bindingResult.getAllErrors();
             throw new RequestValidationException(errors);
@@ -69,6 +69,9 @@ public class DoctorService {
         doctorInfo.setUpdatedDate(LocalDateTime.now());
         user.setDoctorInfo(doctorRepository.save(doctorInfo));
 
+        UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow();
+        user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
+
         return userRepository.save(user);
     }
     public List<UserEntity> getAllDoctor(int page,int size, UUID hospitalId){
@@ -76,16 +79,16 @@ public class DoctorService {
         Pageable pageable = PageRequest.of(page,size,sort);
         return userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
     }
-    public HttpStatus updateDoctorStatus(UUID drId, DoctorStatus status) {
-        userRepository.getDoctorById(drId).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
-        doctorRepository.update(status, drId);
+    public HttpStatus updateDoctorStatus(String email, DoctorStatus status) {
+        userRepository.getDoctorByEmail(email).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
+        doctorRepository.update(status, email);
         return HttpStatus.OK;
     }
 
-    public HttpStatus deleteDoctorFromHospital(UUID drId) {
-        UserEntity user = userRepository.getDoctorById(drId).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
+    public HttpStatus deleteDoctorFromHospital(String email) {
+        UserEntity user = userRepository.getDoctorByEmail(email).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
         DoctorInfo doctorInfo = user.getDoctorInfo();
-        doctorInfo.setHospitalId(null);
+        user.setEmployeeOfHospital(null);
         user.setDoctorInfo(doctorInfo);
         userRepository.save(user);
         return HttpStatus.OK;

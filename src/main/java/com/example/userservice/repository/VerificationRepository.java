@@ -13,7 +13,4 @@ public interface VerificationRepository extends JpaRepository<VerificationEntity
     @Query(value = "select v from verification v where v.userId.email = ?1")
     Optional<VerificationEntity> findByUserEmail(String email);
 
-    @Query(value = "select v from verification v where v.userId.id = ?1 and v.isActive = true")
-    Optional<VerificationEntity> findUserEntityByisActive(UUID userId);
-
 }

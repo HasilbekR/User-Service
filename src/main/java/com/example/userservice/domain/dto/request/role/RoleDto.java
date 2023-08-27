@@ -1,4 +1,4 @@
-package com.example.userservice.domain.dto.request;
+package com.example.userservice.domain.dto.request.role;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

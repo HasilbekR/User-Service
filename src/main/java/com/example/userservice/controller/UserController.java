@@ -1,8 +1,8 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
-import com.example.userservice.domain.dto.request.UserDetailsRequestDto;
-import com.example.userservice.domain.dto.request.UserRequestDto;
+import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
@@ -27,38 +27,14 @@ public class UserController {
 
     private final UserService userService;
     private final DoctorService doctorService;
-
-    @GetMapping("/forgotten-password")
-    public void forgottenPassword(
-            @RequestBody UserDetailsRequestDto email
-    ) {
-        userService.forgottenPassword(email);
-    }
-
-    @GetMapping("/{userId}/verify-code-for-update-password")
-    public String verifyCodeForUpdatePassword(
-            @PathVariable UUID userId,
-            @RequestParam String code
-    ) {
-        return userService.verifyPasswordForUpdatePassword(userId, code);
-    }
-
-
-    @PutMapping("/{userId}/update-password")
-    public String updatePassword(
-            @PathVariable UUID userId,
-            @RequestParam String confirmCode,
-            @RequestParam String newPassword
-    ) {
-        return userService.updatePassword(userId, newPassword, confirmCode);
-    }
-
-    @DeleteMapping("/{userId}/delete-user")
-    public String deleteUser(
-            @PathVariable UUID userId
-    ) {
-        userService.deleteUser(userId);
-        return "Successfully deleted";
+    @PostMapping("/add-doctor")
+    @PreAuthorize(value = "hasRole('ADMIN') and hasAuthority('ADD_DOCTOR')")
+    public ResponseEntity<UserEntity> addDoctor(
+            @Valid @RequestBody DoctorCreateDto drCreateDto,
+            BindingResult bindingResult,
+            Principal principal
+    ){
+        return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult,principal));
     }
 
     @PutMapping("/{userId}/update-user")
@@ -70,25 +46,31 @@ public class UserController {
     }
 
     @GetMapping("/get-all-user")
-    public List<UserEntity> getAll(
-            @RequestParam(required = false) int page,
-            @RequestParam(required = false) int size
+    public ResponseEntity<List<UserEntity>> getAll(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return userService.getAll(page, size);
+        return ResponseEntity.ok(userService.getAll(page, size));
     }
 
-    @PostMapping("/getByEmail")
-    public String getByEmail(
-            @RequestBody UserDetailsRequestDto userDetailsRequestDto
+    @PostMapping("/send-id")
+    public String exchangeId(
+            @RequestBody ExchangeDataDto exchangeDataDto
     ) {
-        UserEntity byEmail = userService.findByEmail(userDetailsRequestDto.getSource());
+        UserEntity user = userService.findByEmail(exchangeDataDto.getSource());
 
-        return String.valueOf(byEmail.getId());
+        return String.valueOf(user.getId());
+    }
+    @GetMapping("/get-me")
+    public ResponseEntity<UserEntity> getMe(
+            @RequestParam String email
+    ){
+        return ResponseEntity.ok(userService.findByEmail(email));
     }
 
-    @GetMapping("/getById")
-    public String getById(
-            @RequestBody UserDetailsRequestDto userBookingDto
+    @PostMapping("/send-email")
+    public String exchangeEmail(
+            @RequestBody ExchangeDataDto userBookingDto
     ) {
         UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
         return user.getEmail();
@@ -105,18 +87,18 @@ public class UserController {
     @PutMapping("/change-doctor-status")
     @PreAuthorize(value = "hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<HttpStatus> changeStatus(
-            @RequestParam UUID drId,
+            @RequestParam String email,
             @RequestParam String status
     ){
-        return ResponseEntity.ok(doctorService.updateDoctorStatus(drId, DoctorStatus.valueOf(status)));
+        return ResponseEntity.ok(doctorService.updateDoctorStatus(email, DoctorStatus.valueOf(status)));
     }
 
     @DeleteMapping("/delete-doctor-from-hospital")
     @PreAuthorize(value = "hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> delete(
-            @RequestParam UUID doctorId
+            @RequestParam String email
     ){
-        return ResponseEntity.ok(doctorService.deleteDoctorFromHospital(doctorId));
+        return ResponseEntity.ok(doctorService.deleteDoctorFromHospital(email));
     }
 
     @PostMapping("/set-doctor-availability")
@@ -127,12 +109,5 @@ public class UserController {
             BindingResult bindingResult
     ){
         return doctorService.setAvailability(doctorAvailability,principal,bindingResult);
-    }
-    @GetMapping("/getDoctorById")
-    public ResponseEntity<UserEntity> getDocById(
-            @RequestParam UUID id
-    ) {
-        UserEntity user = userService.findDocById(id);
-        return ResponseEntity.ok(user);
     }
 }

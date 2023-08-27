@@ -1,4 +1,4 @@
-package com.example.userservice.domain.dto.request;
+package com.example.userservice.domain.dto.request.user;
 
 import com.example.userservice.domain.entity.user.UserState;
 import lombok.AllArgsConstructor;

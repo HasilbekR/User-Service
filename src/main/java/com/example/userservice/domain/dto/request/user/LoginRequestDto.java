@@ -1,5 +1,5 @@
 
-package com.example.userservice.domain.dto.request;
+package com.example.userservice.domain.dto.request.user;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
