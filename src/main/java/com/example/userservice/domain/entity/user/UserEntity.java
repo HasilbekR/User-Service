@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity(name = "users")
 @AllArgsConstructor
@@ -42,6 +43,7 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private UserState state;
     @OneToOne
     private DoctorInfo doctorInfo;
+    private UUID employeeOfHospital;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

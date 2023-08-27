@@ -1,4 +1,4 @@
-package com.example.userservice.domain.dto.request;
+package com.example.userservice.domain.dto.request.user;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;

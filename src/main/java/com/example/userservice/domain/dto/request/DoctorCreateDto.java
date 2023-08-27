@@ -11,7 +11,8 @@ public class DoctorCreateDto {
     private String email;
     @NotBlank(message = "Doctor's room must not be empty")
     private String roomNumber;
-    private UUID hospitalId;
+    @NotBlank(message = "Doctor's information must not be empty")
+    private String info;
     @NotBlank(message = "Specialty must not be empty")
     private String doctorSpecialty;
     private List<String> roles;

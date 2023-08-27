@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface DoctorRepository extends JpaRepository<DoctorInfo, UUID> {
     @Modifying
     @Transactional
-    @Query("update doctors_info set status = :status where id =:id")
-    void update(@Param("status") DoctorStatus status, @Param("id") UUID id);
+    @Query("update doctors_info d set d.status = :status where d.id in (select u.doctorInfo.id from users u where u.email = :email)")
+    void update(@Param("status") DoctorStatus status, @Param("email") String email);
 
 }

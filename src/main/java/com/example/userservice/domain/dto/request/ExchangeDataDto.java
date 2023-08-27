@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDetailsRequestDto {
+public class ExchangeDataDto {
     private String source;
 }

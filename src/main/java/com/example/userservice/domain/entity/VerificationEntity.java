@@ -15,7 +15,4 @@ public class VerificationEntity extends BaseEntity{
     @OneToOne
     private UserEntity userId;
     private String code;
-    private boolean isActive;
-    private String link;
-
 }

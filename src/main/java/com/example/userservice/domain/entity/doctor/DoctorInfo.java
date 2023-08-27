@@ -4,7 +4,6 @@ import com.example.userservice.domain.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
 
 @Entity(name = "doctors_info")
 @AllArgsConstructor
@@ -17,7 +16,8 @@ public class DoctorInfo extends BaseEntity {
     private DoctorStatus status;
     @Column(nullable = false)
     private String roomNumber;
-    private UUID hospitalId;
+    @Column(columnDefinition = "text")
+    private String info;
     @Enumerated(EnumType.STRING)
     private DoctorSpecialty doctorSpecialty;
 }
