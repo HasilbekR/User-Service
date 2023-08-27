@@ -1,9 +1,6 @@
 package com.example.userservice.service;
 
-import com.example.userservice.domain.dto.request.LoginRequestDto;
-import com.example.userservice.domain.dto.request.RoleDto;
-import com.example.userservice.domain.dto.request.UserDetailsRequestDto;
-import com.example.userservice.domain.dto.request.UserRequestDto;
+import com.example.userservice.domain.dto.request.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.role.PermissionEntity;
@@ -14,8 +11,6 @@ import com.example.userservice.domain.entity.user.UserState;
 import com.example.userservice.exception.AuthenticationFailedException;
 import com.example.userservice.exception.DataNotFoundException;
 import com.example.userservice.exception.UserBadRequestException;
-import com.example.userservice.repository.PermissionRepository;
-import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.repository.VerificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +31,6 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
     private final VerificationRepository verificationRepository;
     private final ModelMapper modelMapper;
     private final MailService mailService;
@@ -46,7 +39,7 @@ public class UserService {
     private final RoleService roleService;
 
 
-    public UserEntity save(UserRequestDto userRequestDto) {
+    public UserDetailsForFront save(UserRequestDto userRequestDto) {
         checkUserEmailAndPhoneNumber(userRequestDto.getEmail(), userRequestDto.getPhoneNumber());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -64,7 +57,8 @@ public class UserService {
             throw new DataNotFoundException("Gender not found");
         }
         userEntity.setGender(Gender.valueOf(userRequestDto.getGender()));
-        return userRepository.save(userEntity);
+        UserEntity user = userRepository.save(userEntity);
+        return modelMapper.map(user, UserDetailsForFront.class);
     }
 
 
@@ -77,10 +71,11 @@ public class UserService {
         if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
+            UserDetailsForFront user = modelMapper.map(userEntity, UserDetailsForFront.class);
             return JwtResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
-                    .userEntity(userEntity)
+                    .user(user)
                     .build();
         }
         throw new AuthenticationFailedException("Incorrect username or password");
@@ -138,7 +133,7 @@ public class UserService {
     }
 
     public void forgottenPassword(UserDetailsRequestDto email) {
-        UserEntity userEntity = userRepository.findByEmail(email.getSource())
+        userRepository.findByEmail(email.getSource())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
         Optional<VerificationEntity> byUserEmail = verificationRepository.findByUserEmail(email.getSource());
         if(byUserEmail.isPresent()){

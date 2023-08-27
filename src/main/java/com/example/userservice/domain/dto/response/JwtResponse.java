@@ -1,9 +1,7 @@
 package com.example.userservice.domain.dto.response;
 
-import com.example.userservice.domain.entity.user.UserEntity;
+import com.example.userservice.domain.dto.request.UserDetailsForFront;
 import lombok.*;
-
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,5 +11,5 @@ import java.util.UUID;
 public class JwtResponse {
     private String accessToken;
     private String refreshToken;
-    private UserEntity userEntity;
+    private UserDetailsForFront user;
 }

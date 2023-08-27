@@ -2,6 +2,7 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.LoginRequestDto;
+import com.example.userservice.domain.dto.request.UserDetailsForFront;
 import com.example.userservice.domain.dto.request.UserRequestDto;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.entity.user.UserEntity;
@@ -28,7 +29,7 @@ public class AuthController {
 
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserEntity> signUp(
+    public ResponseEntity<UserDetailsForFront> signUp(
             @Valid @RequestBody UserRequestDto userDto,
             BindingResult bindingResult
     ) throws RequestValidationException {
