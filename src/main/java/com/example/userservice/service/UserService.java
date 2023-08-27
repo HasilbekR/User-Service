@@ -58,7 +58,21 @@ public class UserService {
         }
         userEntity.setGender(Gender.valueOf(userRequestDto.getGender()));
         UserEntity user = userRepository.save(userEntity);
-        return modelMapper.map(user, UserDetailsForFront.class);
+        return mappingUser(user);
+    }
+    private UserDetailsForFront mappingUser(UserEntity userEntity){
+        UserDetailsForFront map = modelMapper.map(userEntity, UserDetailsForFront.class);
+        List<String> roles = new ArrayList<>();
+        for (RoleEntity role : userEntity.getRoles()) {
+            roles.add(role.getName());
+        }
+        List<String> permissions = new ArrayList<>();
+        for (PermissionEntity permission : userEntity.getPermissions()) {
+            permissions.add(permission.getPermission());
+        }
+        map.setRoles(roles);
+        map.setPermissions(permissions);
+        return map;
     }
 
 
@@ -71,7 +85,7 @@ public class UserService {
         if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
-            UserDetailsForFront user = modelMapper.map(userEntity, UserDetailsForFront.class);
+            UserDetailsForFront user = mappingUser(userEntity);
             return JwtResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)

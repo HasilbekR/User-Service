@@ -1,7 +1,5 @@
 package com.example.userservice.domain.dto.request;
 
-import com.example.userservice.domain.entity.role.PermissionEntity;
-import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +17,7 @@ public class UserDetailsForFront {
     private UUID id;
     private String fullName;
     private UserState userState;
-    private List<RoleEntity> roles;
-    private List<PermissionEntity> permissions;
+    private List<String> roles;
+    private List<String> permissions;
 
 }
