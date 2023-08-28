@@ -130,6 +130,7 @@ public class RoleService {
         roles.add(superAdmin);
         user.setRoles(roles);
         user.setEmployeeOfHospital(hospitalId);
+        userRepository.save(user);
     }
     public UUID checkHospitalId(UUID id) {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(id.toString());
