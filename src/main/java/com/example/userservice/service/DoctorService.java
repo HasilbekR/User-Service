@@ -102,15 +102,10 @@ public class DoctorService {
         return permissionRepository.findPermissionEntitiesByPermissionIn(permissions);
     }
     public void checkDoctorEmail(UserEntity user) {
-        boolean isPresent = false;
         for (RoleEntity role : user.getRoles()) {
             if (role.getName().equals("DOCTOR")) {
-                isPresent = true;
-                break;
+                throw new UserBadRequestException("EMAIL ALREADY EXISTS");
             }
-        }
-        if (isPresent) {
-            throw new UserBadRequestException("EMAIL ALREADY EXISTS");
         }
     }
 

@@ -115,8 +115,10 @@ public class RoleService {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow();
 
         List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(roleEntity)) throw new UserBadRequestException("User already has "+role.getName()+" role");
+        }
         roles.add(roleEntity);
-
         user.setRoles(roles);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
         userRepository.save(user);
