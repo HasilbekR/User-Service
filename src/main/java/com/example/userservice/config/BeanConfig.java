@@ -36,21 +36,6 @@ public class BeanConfig {
                                 .bearerFormat("JWT")));
     }
 
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // Разрешенный источник
-                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Разрешенные HTTP-методы
-                        .allowCredentials(true) // Разрешить куки и аутентификацию заголовков
-                        .allowedHeaders("*")// Разрешенные заголовки
-                        .exposedHeaders("Access-Control-Allow-Origin: *");
-            }
-        };
-    }
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
