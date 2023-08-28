@@ -8,7 +8,6 @@ import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
-import com.example.userservice.exception.UniqueObjectException;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
@@ -34,6 +33,7 @@ public class RoleService {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final RestTemplate restTemplate;
+    private final JwtService jwtService;
     @Value("${services.get-hospital}")
     private String getHospitalId;
 
@@ -135,6 +135,7 @@ public class RoleService {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(id.toString());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set("Authorization", "Bearer " + jwtService.generateAccessTokenForService("HOSPITAL-SERVICE"));
         HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeDataDto, httpHeaders);
         ResponseEntity<String> response = restTemplate.exchange(
                 URI.create(getHospitalId),

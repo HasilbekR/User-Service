@@ -52,5 +52,13 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
     }
+    public String generateAccessTokenForService(String receiverService){
+        return Jwts.builder()
+                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .setIssuer("USER-SERVICE")
+                .setSubject(receiverService)
+                .addClaims(Map.of("authorities", List.of("ROLE_SENDER")))
+                .compact();
+    }
 
 }
