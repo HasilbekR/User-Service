@@ -127,6 +127,9 @@ public class RoleService {
         UUID hospitalId = checkHospitalId(hospitalAssignDto.getHospitalId());
         RoleEntity superAdmin = roleRepository.findRoleEntityByName("SUPER_ADMIN").orElseThrow();
         List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(superAdmin)) throw new AccessDeniedException("User already has super_admin role");
+        }
         roles.add(superAdmin);
         user.setRoles(roles);
         user.setEmployeeOfHospital(hospitalId);
