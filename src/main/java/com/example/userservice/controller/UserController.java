@@ -83,6 +83,12 @@ public class UserController {
     ){
         return ResponseEntity.ok(doctorService.getAllDoctor(page,size, hospitalId));
     }
+    @GetMapping("/get-doctor-specialties")
+    public ResponseEntity<List<String>> getSpecialties(
+            @RequestParam UUID hospitalId
+    ){
+        return ResponseEntity.ok(doctorService.getDoctorSpecialtiesFromHospital(hospitalId));
+    }
 
     @PutMapping("/change-doctor-status")
     @PreAuthorize(value = "hasAnyRole('DOCTOR','ADMIN')")

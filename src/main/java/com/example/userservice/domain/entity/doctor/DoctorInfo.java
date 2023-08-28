@@ -18,6 +18,6 @@ public class DoctorInfo extends BaseEntity {
     private String roomNumber;
     @Column(columnDefinition = "text")
     private String info;
-    @Enumerated(EnumType.STRING)
+    @OneToOne
     private DoctorSpecialty doctorSpecialty;
 }
