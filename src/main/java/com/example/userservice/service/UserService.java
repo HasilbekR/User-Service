@@ -61,7 +61,7 @@ public class UserService {
         UserEntity user = userRepository.save(userEntity);
         return mappingUser(user);
     }
-    private UserDetailsForFront mappingUser(UserEntity userEntity){
+    public UserDetailsForFront mappingUser(UserEntity userEntity){
         UserDetailsForFront map = modelMapper.map(userEntity, UserDetailsForFront.class);
         List<String> roles = new ArrayList<>();
         for (RoleEntity role : userEntity.getRoles()) {
@@ -170,12 +170,12 @@ public class UserService {
         return "Successfully updated";
     }
 
-    private String generateVerificationCode() {
+    public String generateVerificationCode() {
         Random random = new Random(System.currentTimeMillis());
         return String.valueOf(random.nextInt(1000000));
     }
 
-    private void checkUserEmailAndPhoneNumber(String email, String phoneNumber) {
+    public void checkUserEmailAndPhoneNumber(String email, String phoneNumber) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new UserBadRequestException("email already exists");
         }
