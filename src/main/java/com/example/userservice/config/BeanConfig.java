@@ -46,7 +46,8 @@ public class BeanConfig {
                         .allowedOrigins("http://localhost:3000") // Разрешенный источник
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Разрешенные HTTP-методы
                         .allowCredentials(true) // Разрешить куки и аутентификацию заголовков
-                        .allowedHeaders("*"); // Разрешенные заголовки
+                        .allowedHeaders("*")// Разрешенные заголовки
+                        .exposedHeaders("Access-Control-Allow-Origin: *");
             }
         };
     }
