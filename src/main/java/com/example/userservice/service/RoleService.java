@@ -105,8 +105,8 @@ public class RoleService {
     }
 
     public String assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
-        if(Objects.equals(roleAssignDto.getName(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
-        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
+        if(Objects.equals(roleAssignDto.getRole(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getRole())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
 
         UserEntity user = userRepository.findByEmail(roleAssignDto.getEmail())
@@ -118,8 +118,18 @@ public class RoleService {
         for (RoleEntity role : roles) {
             if(role.equals(roleEntity)) throw new UserBadRequestException("User already has "+role.getName()+" role");
         }
+        List<String> permissions = roleAssignDto.getPermissions();
+        List<PermissionEntity> permissionList = new ArrayList<>();
+        for (String permission : permissions) {
+            for (PermissionEntity roleEntityPermission : roleEntity.getPermissions()) {
+                if(permission.equals(roleEntityPermission.getPermission())){
+                    permissionList.add(roleEntityPermission);
+                }
+            }
+        }
         roles.add(roleEntity);
         user.setRoles(roles);
+        user.setPermissions(permissionList);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
         userRepository.save(user);
         return user.getEmail();
