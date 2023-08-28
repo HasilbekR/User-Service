@@ -33,7 +33,6 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<JwtResponse> signIn(
             @RequestBody LoginRequestDto loginDto
     ){
