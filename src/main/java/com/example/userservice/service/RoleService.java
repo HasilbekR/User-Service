@@ -8,6 +8,7 @@ import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
+import com.example.userservice.exception.UserBadRequestException;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
@@ -129,7 +130,7 @@ public class RoleService {
         RoleEntity superAdmin = roleRepository.findRoleEntityByName("SUPER_ADMIN").orElseThrow();
         List<RoleEntity> roles = user.getRoles();
         for (RoleEntity role : roles) {
-            if(role.equals(superAdmin)) throw new AccessDeniedException("User already has super_admin role");
+            if(role.equals(superAdmin)) throw new UserBadRequestException("User already has super_admin role");
         }
         roles.add(superAdmin);
         user.setRoles(roles);
