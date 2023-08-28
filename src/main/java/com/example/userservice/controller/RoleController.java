@@ -1,8 +1,10 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.domain.dto.request.role.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
+import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.RoleService;
@@ -51,13 +53,21 @@ public class RoleController {
         return ResponseEntity.ok(roleService.update(roleDto));
     }
 
-    @PostMapping("/assign-role-to-user")
+    @PostMapping("/assign-role-permissions-to-user")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public ResponseEntity<String> assignRoleToUser(
             @RequestBody RoleAssignDto roleAssignDto,
             Principal principal
     ) {
         return ResponseEntity.ok("Role successfully assigned to " + roleService.assignRoleToUser(roleAssignDto, principal));
+    }
+
+    @PostMapping("/add-permissions-to-user")
+    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+    public ResponseEntity<String> assignPermissionsToUser(
+            @RequestBody RoleAssignDto roleAssignDto
+    ) {
+        return ResponseEntity.ok("Permissions successfully added to " + roleService.addPermissionsToUser(roleAssignDto));
     }
 
     @PostMapping("/assign-hospital")
@@ -68,4 +78,12 @@ public class RoleController {
         roleService.assignHospital(hospitalAssignDto);
         return ResponseEntity.ok("Successfully assigned hospital");
     }
+    @PostMapping("/save-doctor-specialty")
+    @PreAuthorize(value = "hasRole('ADMIN') and hasAuthority('CREATE_SPECIALTY')")
+    public ResponseEntity<DoctorSpecialty> saveDoctorSpecialty(
+            @RequestBody DoctorSpecialtyDto doctorSpecialtyDto
+            ){
+        return ResponseEntity.ok(roleService.saveDoctorSpecialty(doctorSpecialtyDto));
+    }
+
 }

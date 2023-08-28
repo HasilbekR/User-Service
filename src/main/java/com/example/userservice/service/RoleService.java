@@ -1,18 +1,23 @@
 package com.example.userservice.service;
 
+import com.example.userservice.domain.dto.request.role.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
+import com.example.userservice.exception.UniqueObjectException;
 import com.example.userservice.exception.UserBadRequestException;
+import com.example.userservice.repository.DoctorSpecialtyRepository;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,6 +40,8 @@ public class RoleService {
     private final PermissionRepository permissionRepository;
     private final RestTemplate restTemplate;
     private final JwtService jwtService;
+    private final ModelMapper modelMapper;
+    private final DoctorSpecialtyRepository doctorSpecialtyRepository;
     @Value("${services.get-hospital}")
     private String getHospitalId;
 
@@ -42,26 +49,7 @@ public class RoleService {
         RoleEntity roleEntityByName = roleRepository.findRoleEntitiesByName(roleDto.getName());
         List<String> roleDtoPermissions = roleDto.getPermissions();
         // If role already exists
-        if (roleEntityByName != null) {
-            List<PermissionEntity> rolePermissions = roleEntityByName.getPermissions();
-            // Checking if dto has another permission which role doesn't have
-            for (String roleDtoPermission : roleDtoPermissions) {
-                if (rolePermissions.stream().noneMatch(permission -> permission.getPermission().equals(roleDtoPermission))) {
-                    // Checking if database has this extra permission
-                    PermissionEntity permissionEntitiesByPermission = permissionRepository.findPermissionEntitiesByPermission(roleDtoPermission);
-                    if (permissionEntitiesByPermission != null) {
-                        rolePermissions.add(permissionEntitiesByPermission);
-                    }
-                    // If it doesn't have we create a new permission
-                    else{
-                        permissionEntitiesByPermission = PermissionEntity.builder().permission(roleDtoPermission).build();
-                        rolePermissions.add(permissionRepository.save(permissionEntitiesByPermission));
-                    }
-                }
-            }
-            roleEntityByName.setPermissions(rolePermissions);
-            return roleRepository.save(roleEntityByName);
-        }
+        if (roleEntityByName != null) throw new UniqueObjectException("Role already exists");
         // If role doesn't exists in db
         List<String> permissions = roleDto.getPermissions();
         List<PermissionEntity> rolePermission = new ArrayList<>();
@@ -105,8 +93,8 @@ public class RoleService {
     }
 
     public String assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
-        if(Objects.equals(roleAssignDto.getRole(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
-        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getRole())
+        if(Objects.equals(roleAssignDto.getName(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
 
         UserEntity user = userRepository.findByEmail(roleAssignDto.getEmail())
@@ -131,6 +119,35 @@ public class RoleService {
         user.setRoles(roles);
         user.setPermissions(permissionList);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
+        userRepository.save(user);
+        return user.getEmail();
+    }
+
+    public String addPermissionsToUser(RoleAssignDto roleAssignDto) {
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
+                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
+        UserEntity user = userRepository.findByEmail(roleAssignDto.getEmail())
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        List<PermissionEntity> permissionList = user.getPermissions();
+
+        List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(roleEntity)){
+                List<String> permissions = roleAssignDto.getPermissions();
+                for (String permission : permissions) {
+                    for (PermissionEntity roleEntityPermission : roleEntity.getPermissions()) {
+                        if(permission.equals(roleEntityPermission.getPermission())){
+                            permissionList.add(roleEntityPermission);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+        user.setPermissions(permissionList);
         userRepository.save(user);
         return user.getEmail();
     }
@@ -161,6 +178,10 @@ public class RoleService {
                 entity,
                 String.class);
         return UUID.fromString(Objects.requireNonNull(response.getBody()));
+    }
+    public DoctorSpecialty saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
+        DoctorSpecialty specialty = modelMapper.map(doctorSpecialtyDto, DoctorSpecialty.class);
+        return doctorSpecialtyRepository.save(specialty);
     }
 
 

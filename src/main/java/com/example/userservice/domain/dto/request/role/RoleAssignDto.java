@@ -1,5 +1,6 @@
 package com.example.userservice.domain.dto.request.role;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleAssignDto {
-    private String role;
+    @NotBlank(message = "Role name must not be blank")
+    private String name;
+    @NotBlank(message = "Permissions must not be blank")
     private List<String> permissions;
+    @NotBlank(message = "Email must not be blank")
     private String email;
 }
