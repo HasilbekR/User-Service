@@ -13,17 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-@CrossOrigin(
-        origins = {
-                "http://localhost:3000"
-        },
-        methods = {
-                RequestMethod.OPTIONS,
-                RequestMethod.GET,
-                RequestMethod.PUT,
-                RequestMethod.DELETE,
-                RequestMethod.POST
-        })
+
 @RestController
 @RequestMapping("/user/auth")
 @RequiredArgsConstructor
@@ -43,6 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<JwtResponse> signIn(
             @RequestBody LoginRequestDto loginDto
     ){
