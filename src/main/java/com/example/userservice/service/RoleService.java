@@ -125,6 +125,7 @@ public class RoleService {
         UserEntity user = userRepository.findByEmail(hospitalAssignDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
         UUID hospitalId = checkHospitalId(hospitalAssignDto.getHospitalId());
+        if(hospitalId == null) throw new DataNotFoundException("Hospital not found");
         RoleEntity superAdmin = roleRepository.findRoleEntityByName("SUPER_ADMIN").orElseThrow();
         List<RoleEntity> roles = user.getRoles();
         for (RoleEntity role : roles) {
