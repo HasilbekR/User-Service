@@ -11,10 +11,7 @@ import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.exception.UserBadRequestException;
-import com.example.userservice.repository.DoctorRepository;
-import com.example.userservice.repository.PermissionRepository;
-import com.example.userservice.repository.RoleRepository;
-import com.example.userservice.repository.UserRepository;
+import com.example.userservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +39,7 @@ public class DoctorService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final DoctorSpecialtyRepository doctorSpecialtyRepository;
 
     private final RestTemplate restTemplate;
     @Value("${services.create-time-slots}")
@@ -57,7 +55,8 @@ public class DoctorService {
         checkDoctorEmail(user);
 
         DoctorInfo doctorInfo = modelMapper.map(drCreateDto, DoctorInfo.class);
-        doctorInfo.setDoctorSpecialty(DoctorSpecialty.valueOf(drCreateDto.getDoctorSpecialty()));
+        DoctorSpecialty specialty = doctorSpecialtyRepository.findDoctorSpecialtyByName(drCreateDto.getDoctorSpecialty()).orElseThrow(() -> new DataNotFoundException("Doctor specialty not found"));
+        doctorInfo.setDoctorSpecialty(specialty);
         List<RoleEntity> roles = user.getRoles();
         roles.addAll(getRolesString(drCreateDto.getRoles()));
         user.setRoles(roles);
@@ -83,6 +82,9 @@ public class DoctorService {
         userRepository.getDoctorByEmail(email).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
         doctorRepository.update(status, email);
         return HttpStatus.OK;
+    }
+    public List<String> getDoctorSpecialtiesFromHospital(UUID hospitalId){
+        return userRepository.getAllSpecialtiesFromHospital(hospitalId);
     }
 
     public HttpStatus deleteDoctorFromHospital(String email) {

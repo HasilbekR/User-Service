@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +22,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> getDoctorByEmail(String email);
     @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.id = ?1")
     Optional<UserEntity> getDoctorById(UUID id);
+    @Query(value = "select u.doctorInfo.doctorSpecialty.name from users u where u.employeeOfHospital = ?1")
+    List<String> getAllSpecialtiesFromHospital(UUID hospitalId);
 
 
 }
