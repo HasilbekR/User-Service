@@ -3,6 +3,7 @@ package com.example.userservice.controller;
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
@@ -10,8 +11,6 @@ import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -29,16 +28,16 @@ public class UserController {
     private final DoctorService doctorService;
     @PostMapping("/add-doctor")
     @PreAuthorize(value = "hasRole('ADMIN') and hasAuthority('ADD_DOCTOR')")
-    public ResponseEntity<UserEntity> addDoctor(
+    public StandardResponse<UserEntity> addDoctor(
             @Valid @RequestBody DoctorCreateDto drCreateDto,
             BindingResult bindingResult,
             Principal principal
     ){
-        return ResponseEntity.ok(doctorService.saveDoctor(drCreateDto,bindingResult,principal));
+        return doctorService.saveDoctor(drCreateDto,bindingResult,principal);
     }
 
     @PutMapping("/{userId}/update-user")
-    public UserEntity updateUpdateProfile(
+    public StandardResponse<UserEntity> updateUpdateProfile(
             @PathVariable UUID userId,
             @RequestBody UserRequestDto update
     ) {
@@ -46,70 +45,69 @@ public class UserController {
     }
 
     @GetMapping("/get-all-user")
-    public ResponseEntity<List<UserEntity>> getAll(
+    public StandardResponse<List<UserEntity>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(userService.getAll(page, size));
+        return userService.getAll(page, size);
     }
 
     @PostMapping("/send-id")
     public String exchangeId(
             @RequestBody ExchangeDataDto exchangeDataDto
     ) {
-        UserEntity user = userService.findByEmail(exchangeDataDto.getSource());
-
-        return String.valueOf(user.getId());
-    }
-    @GetMapping("/get-me")
-    public ResponseEntity<UserEntity> getMe(
-            @RequestParam String email
-    ){
-        return ResponseEntity.ok(userService.findByEmail(email));
+        return userService.sendId(exchangeDataDto.getSource());
     }
 
     @PostMapping("/send-email")
     public String exchangeEmail(
             @RequestBody ExchangeDataDto userBookingDto
     ) {
-        UserEntity user = userService.findById(UUID.fromString(userBookingDto.getSource()));
-        return user.getEmail();
+        return userService.sendEmail(UUID.fromString(userBookingDto.getSource()));
     }
+
+    @GetMapping("/get-me")
+    public StandardResponse<UserEntity> getMe(
+            @RequestParam String email
+    ){
+        return userService.getMeByEmail(email);
+    }
+
     @GetMapping("/get-all-doctors-from-hospital")
-    public ResponseEntity<List<UserEntity>> getAll(
+    public StandardResponse<List<UserEntity>> getAll(
             @RequestParam(required = false,defaultValue = "0") int page,
             @RequestParam(required = false,defaultValue = "10") int size,
             @RequestParam UUID hospitalId
     ){
-        return ResponseEntity.ok(doctorService.getAllDoctor(page,size, hospitalId));
+        return doctorService.getAllDoctor(page,size, hospitalId);
     }
     @GetMapping("/get-doctor-specialties")
-    public ResponseEntity<List<String>> getSpecialties(
+    public StandardResponse<List<String>> getSpecialties(
             @RequestParam UUID hospitalId
     ){
-        return ResponseEntity.ok(doctorService.getDoctorSpecialtiesFromHospital(hospitalId));
+        return doctorService.getDoctorSpecialtiesFromHospital(hospitalId);
     }
 
     @PutMapping("/change-doctor-status")
     @PreAuthorize(value = "hasAnyRole('DOCTOR','ADMIN')")
-    public ResponseEntity<HttpStatus> changeStatus(
+    public StandardResponse<String> changeStatus(
             @RequestParam String email,
             @RequestParam String status
     ){
-        return ResponseEntity.ok(doctorService.updateDoctorStatus(email, DoctorStatus.valueOf(status)));
+        return doctorService.updateDoctorStatus(email, DoctorStatus.valueOf(status));
     }
 
     @DeleteMapping("/delete-doctor-from-hospital")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
-    public ResponseEntity<HttpStatus> delete(
+    public StandardResponse<String> delete(
             @RequestParam String email
     ){
-        return ResponseEntity.ok(doctorService.deleteDoctorFromHospital(email));
+        return doctorService.deleteDoctorFromHospital(email);
     }
 
     @PostMapping("/set-doctor-availability")
     @PreAuthorize(value = "hasRole('DOCTOR')")
-    public ResponseEntity<String>  setAvailability(
+    public StandardResponse<String>  setAvailability(
             @Valid @RequestBody DoctorAvailability doctorAvailability,
             Principal principal,
             BindingResult bindingResult

@@ -4,13 +4,13 @@ import com.example.userservice.domain.dto.request.role.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -26,7 +26,7 @@ public class RoleController {
     private final RoleService roleService;
     @PostMapping("/create")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
-    public ResponseEntity<RoleEntity> createRole(
+    public StandardResponse<RoleEntity> createRole(
             @Valid @RequestBody RoleDto roleDto,
             BindingResult bindingResult
             )throws RequestValidationException {
@@ -34,56 +34,55 @@ public class RoleController {
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             throw new RequestValidationException(allErrors);
         }
-        return ResponseEntity.ok(roleService.save(roleDto));
+        return roleService.save(roleDto);
     }
 
     @GetMapping("/get-role")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN' or 'ADMIN')")
-    public ResponseEntity<RoleEntity> getRole(
+    public StandardResponse<RoleEntity> getRole(
             @RequestParam String name
     ){
-        return ResponseEntity.ok(roleService.getRole(name));
+        return roleService.getRole(name);
     }
 
     @PutMapping("/add-permissions-to-role")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
-    public ResponseEntity<RoleEntity> update(
+    public StandardResponse<RoleEntity> update(
             @RequestBody RoleDto roleDto
     ){
-        return ResponseEntity.ok(roleService.update(roleDto));
+        return roleService.update(roleDto);
     }
 
     @PostMapping("/assign-role-permissions-to-user")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
-    public ResponseEntity<String> assignRoleToUser(
+    public StandardResponse<String> assignRoleToUser(
             @RequestBody RoleAssignDto roleAssignDto,
             Principal principal
     ) {
-        return ResponseEntity.ok("Role successfully assigned to " + roleService.assignRoleToUser(roleAssignDto, principal));
+        return roleService.assignRoleToUser(roleAssignDto, principal);
     }
 
     @PostMapping("/add-permissions-to-user")
     @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
-    public ResponseEntity<String> assignPermissionsToUser(
+    public StandardResponse<String> assignPermissionsToUser(
             @RequestBody RoleAssignDto roleAssignDto
     ) {
-        return ResponseEntity.ok("Permissions successfully added to " + roleService.addPermissionsToUser(roleAssignDto));
+        return roleService.addPermissionsToUser(roleAssignDto);
     }
 
     @PostMapping("/assign-hospital")
     @PreAuthorize(value = "hasRole('OWNER')")
-    public ResponseEntity<String> assignHospital(
+    public StandardResponse<String> assignHospital(
             @RequestBody HospitalAssignDto hospitalAssignDto
             ){
-        roleService.assignHospital(hospitalAssignDto);
-        return ResponseEntity.ok("Successfully assigned hospital");
+        return roleService.assignHospital(hospitalAssignDto);
     }
     @PostMapping("/save-doctor-specialty")
     @PreAuthorize(value = "hasRole('ADMIN') and hasAuthority('CREATE_SPECIALTY')")
-    public ResponseEntity<DoctorSpecialty> saveDoctorSpecialty(
+    public StandardResponse<DoctorSpecialty> saveDoctorSpecialty(
             @RequestBody DoctorSpecialtyDto doctorSpecialtyDto
             ){
-        return ResponseEntity.ok(roleService.saveDoctorSpecialty(doctorSpecialtyDto));
+        return roleService.saveDoctorSpecialty(doctorSpecialtyDto);
     }
 
 }
