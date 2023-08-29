@@ -109,8 +109,9 @@ public class UserService {
                     .refreshToken(refreshToken)
                     .user(user)
                     .build();
+        }else {
+            throw new AuthenticationFailedException("Incorrect username or password");
         }
-        throw new AuthenticationFailedException("Incorrect username or password");
     }
 
     public UserEntity updateProfile(UUID userId, UserRequestDto update) {
