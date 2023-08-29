@@ -12,6 +12,7 @@ import com.example.userservice.domain.entity.user.UserState;
 import com.example.userservice.exception.AuthenticationFailedException;
 import com.example.userservice.exception.DataNotFoundException;
 import com.example.userservice.exception.UserBadRequestException;
+import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.repository.VerificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class UserService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final RoleRepository roleRepository;
 
 
     public UserDetailsForFront save(UserRequestDto userRequestDto) {
@@ -50,10 +52,13 @@ public class UserService {
         userEntity.setState(UserState.UNVERIFIED);
         userEntity.setDateOfBirth(dateOfBirth);
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
-        RoleDto roleDto = RoleDto.builder().name("USER").permissions(List.of("GET", "UPDATE","DELETE")).build();
-        RoleEntity roleEntity = roleService.save(roleDto);
-        userEntity.setRoles(List.of(roleEntity));
-        userEntity.setPermissions(List.of(roleEntity.getPermissions().toArray(new PermissionEntity[0])));
+        RoleEntity role = roleRepository.findRoleEntitiesByName("USER");
+        if (role == null) {
+            RoleDto roleDto = RoleDto.builder().name("USER").permissions(List.of("GET", "UPDATE", "DELETE")).build();
+            role = roleService.save(roleDto);
+        }
+        userEntity.setRoles(List.of(role));
+        userEntity.setPermissions(List.of(role.getPermissions().toArray(new PermissionEntity[0])));
         if(!(Objects.equals(userRequestDto.getGender(), "MALE") || Objects.equals(userRequestDto.getGender(), "FEMALE"))){
             throw new DataNotFoundException("Gender not found");
         }
