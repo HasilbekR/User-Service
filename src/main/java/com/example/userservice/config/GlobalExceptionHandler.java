@@ -2,6 +2,7 @@ package com.example.userservice.config;
 
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.exception.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -18,10 +19,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {AuthenticationFailedException.class})
-    public StandardResponse<String> authenticationFailedExceptionHandler(
+    public ResponseEntity<String> authenticationFailedExceptionHandler(
             AuthenticationFailedException e
     ){
-        return StandardResponse.<String>builder().status("401").message(e.getMessage()).data(e.getMessage()).build();
+//        return StandardResponse.<String>builder().status("401").message(e.getMessage()).data(e.getMessage()).build();
+        return ResponseEntity.status(401).body(e.getMessage());
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public StandardResponse<String> AccessDeniedExceptionHandler(
