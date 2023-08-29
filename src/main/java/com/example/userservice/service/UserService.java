@@ -110,8 +110,9 @@ public class UserService {
                     .user(user)
                     .build();
             return StandardResponse.<JwtResponse>builder().status("200").message("Successfully signed in").data(jwtResponse).build();
+        }else {
+            throw new AuthenticationFailedException("Incorrect username or password");
         }
-        throw new AuthenticationFailedException("Incorrect username or password");
     }
 
     public StandardResponse<UserEntity> updateProfile(UUID userId, UserRequestDto update) {
