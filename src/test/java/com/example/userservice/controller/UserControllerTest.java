@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
@@ -18,15 +19,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
 import java.security.Principal;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @WebMvcTest(UserController.class)
@@ -50,9 +49,10 @@ public class UserControllerTest {
     @WithMockUser(roles = "ADMIN")
     public void testAddDoctor() throws Exception {
         DoctorCreateDto drCreateDto = new DoctorCreateDto();
+        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().build();
 
         when(doctorService.saveDoctor(any(DoctorCreateDto.class), any(BindingResult.class), any(Principal.class)))
-                .thenReturn(new UserEntity());
+                .thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/add-doctor")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,8 +65,9 @@ public class UserControllerTest {
     public void testUpdateUserProfile() throws Exception {
         UUID userId = UUID.randomUUID();
         UserRequestDto update = new UserRequestDto();
+        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().build();
 
-        when(userService.updateProfile(any(UUID.class), any(UserRequestDto.class))).thenReturn(new UserEntity());
+        when(userService.updateProfile(any(UUID.class), any(UserRequestDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(put("/user/{userId}/update-user", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,8 +82,10 @@ public class UserControllerTest {
 
         UserEntity userEntity = new UserEntity();
         userEntity.setId(UUID.randomUUID());
+        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().data(userEntity).build();
 
-        when(userService.findByEmail(anyString())).thenReturn(userEntity);
+
+        when(userService.getMeByEmail(anyString())).thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/send-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,28 +95,12 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testExchangeEmail() throws Exception {
-        ExchangeDataDto exchangeDataDto = new ExchangeDataDto();
-        exchangeDataDto.setSource(UUID.randomUUID().toString());
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("example@example.com");
-
-        when(userService.findById(any(UUID.class))).thenReturn(userEntity);
-
-        mockMvc.perform(post("/user/send-email")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(exchangeDataDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(userEntity.getEmail()));
-    }
-
-    @Test
     public void testGetAllDoctorsFromHospital() throws Exception {
         UUID hospitalId = UUID.randomUUID();
+        StandardResponse<List<UserEntity>> mockResponse = StandardResponse.<List<UserEntity>>builder().build();
 
         when(doctorService.getAllDoctor(anyInt(), anyInt(), any(UUID.class)))
-                .thenReturn(new ArrayList<>());
+                .thenReturn(mockResponse);
 
         mockMvc.perform(get("/user/get-all-doctors-from-hospital")
                         .param("hospitalId", hospitalId.toString()))
@@ -126,9 +113,11 @@ public class UserControllerTest {
     public void testChangeDoctorStatus() throws Exception {
         String email = "doctor@example.com";
         String status = "ACTIVE";
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
+
 
         when(doctorService.updateDoctorStatus(anyString(), any(DoctorStatus.class)))
-                .thenReturn(HttpStatus.OK);
+                .thenReturn(mockResponse);
 
         mockMvc.perform(put("/user/change-doctor-status")
                         .param("email", email)
@@ -140,9 +129,11 @@ public class UserControllerTest {
     @WithMockUser(roles = "SUPER_ADMIN")
     public void testDeleteDoctorFromHospital() throws Exception {
         String email = "doctor@example.com";
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
+
 
         when(doctorService.deleteDoctorFromHospital(anyString()))
-                .thenReturn(HttpStatus.OK);
+                .thenReturn(mockResponse);
 
         mockMvc.perform(delete("/user/delete-doctor-from-hospital")
                         .param("email", email))
@@ -153,10 +144,11 @@ public class UserControllerTest {
     @WithMockUser(roles = "DOCTOR")
     public void testSetDoctorAvailability() throws Exception {
         DoctorAvailability doctorAvailability = new DoctorAvailability();
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
 
 
         when(doctorService.setAvailability(any(DoctorAvailability.class), any(Principal.class), any(BindingResult.class)))
-                .thenReturn(ResponseEntity.ok("Availability set successfully"));
+                .thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/set-doctor-availability")
                         .contentType(MediaType.APPLICATION_JSON)

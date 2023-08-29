@@ -7,7 +7,6 @@ import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
@@ -34,55 +33,55 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<JwtResponse> signIn(
+    public StandardResponse<JwtResponse> signIn(
             @RequestBody LoginRequestDto loginDto
     ){
-        return ResponseEntity.ok(userService.signIn(loginDto));
+        return userService.signIn(loginDto);
     }
     @GetMapping("/verify")
-    public ResponseEntity<String> verify(
+    public StandardResponse<String> verify(
             @RequestParam String code,
             Principal principal
     ) {
-        return ResponseEntity.ok(userService.verify(principal, code));
+        return userService.verify(principal, code);
     }
     @GetMapping("/send-verification-code")
-    public void sendVerificationCode(
+    public StandardResponse<String> sendVerificationCode(
             Principal principal
     ){
-        userService.sendVerificationCode(principal.getName());
+        return userService.sendVerificationCode(principal.getName());
     }
     @GetMapping("/access-token")
-    public ResponseEntity<JwtResponse> getAccessToken(
+    public StandardResponse<JwtResponse> getAccessToken(
             Principal principal
     ) {
-        return ResponseEntity.ok(userService.getNewAccessToken(principal));
+        return userService.getNewAccessToken(principal);
     }
 
     @GetMapping("/refresh-token")
-    public ResponseEntity<JwtResponse> refreshAccessToken(
+    public StandardResponse<JwtResponse> refreshAccessToken(
             Principal principal
     ){
-        return ResponseEntity.ok(userService.getNewAccessToken(principal));
+        return userService.getNewAccessToken(principal);
     }
     @GetMapping("/forgot-password")
-    public void forgottenPassword(
+    public StandardResponse<String> forgottenPassword(
             @RequestParam String email
     ) {
-        userService.forgottenPassword(email);
+        return userService.forgottenPassword(email);
     }
 
     @PostMapping("/verify-code-for-update-password")
-    public ResponseEntity<String> verifyCodeForUpdatePassword(
+    public StandardResponse<String> verifyCodeForUpdatePassword(
             @RequestBody VerifyCodeDto verifyCodeDto
     ) {
-        return ResponseEntity.ok(userService.verifyPasswordForUpdatePassword(verifyCodeDto));
+        return userService.verifyPasswordForUpdatePassword(verifyCodeDto);
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<String> updatePassword(
+    public StandardResponse<String> updatePassword(
             @RequestBody UpdatePasswordDto updatePasswordDto
     ) {
-        return ResponseEntity.ok(userService.updatePassword(updatePasswordDto));
+        return userService.updatePassword(updatePasswordDto);
     }
 }

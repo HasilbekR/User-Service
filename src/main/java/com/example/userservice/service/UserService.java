@@ -56,7 +56,7 @@ public class UserService {
         RoleEntity role = roleRepository.findRoleEntitiesByName("USER");
         if (role == null) {
             RoleDto roleDto = RoleDto.builder().name("USER").permissions(List.of("GET", "UPDATE", "DELETE")).build();
-            role = roleService.save(roleDto);
+            role = roleService.save(roleDto).getData();
         }
         userEntity.setRoles(List.of(role));
         userEntity.setPermissions(List.of(role.getPermissions().toArray(new PermissionEntity[0])));
@@ -94,7 +94,7 @@ public class UserService {
     }
 
 
-    public JwtResponse signIn(LoginRequestDto loginRequestDto) {
+    public StandardResponse<JwtResponse> signIn(LoginRequestDto loginRequestDto) {
         UserEntity userEntity = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("Incorrect email or password"));
         if (userEntity.getState() == UserState.BLOCKED) {
@@ -104,28 +104,36 @@ public class UserService {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
             UserDetailsForFront user = mappingUser(userEntity);
-            return JwtResponse.builder()
+            JwtResponse jwtResponse = JwtResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .user(user)
                     .build();
+            return StandardResponse.<JwtResponse>builder().status("200").message("Successfully signed in").data(jwtResponse).build();
         }
         throw new AuthenticationFailedException("Incorrect username or password");
     }
 
-    public UserEntity updateProfile(UUID userId, UserRequestDto update) {
+    public StandardResponse<UserEntity> updateProfile(UUID userId, UserRequestDto update) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new UserBadRequestException("user not found"));
         modelMapper.map(update, userEntity);
         userEntity.setUpdatedDate(LocalDateTime.now());
-        return userRepository.save(userEntity);
+
+        return StandardResponse.<UserEntity>builder().status("200")
+                .message("User updated successfully")
+                .data(userRepository.save(userEntity))
+                .build();
     }
 
-    public List<UserEntity> getAll(int page, int size) {
+    public StandardResponse<List<UserEntity>> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findAll(pageable).getContent();
+        return StandardResponse.<List<UserEntity>>builder().status("200")
+                .message("User list "+page+"-page")
+                .data(userRepository.findAll(pageable).getContent())
+                .build();
     }
-    public void sendVerificationCode(String email){
+    public StandardResponse<String> sendVerificationCode(String email){
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
         VerificationEntity verificationEntity = VerificationEntity.builder()
                 .userId(userEntity)
@@ -133,9 +141,10 @@ public class UserService {
                 .build();
         verificationRepository.save(verificationEntity);
         mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode());
+        return StandardResponse.<String>builder().status("200").message("Verification code has been sent").build();
     }
 
-    public String verify(Principal principal, String code) {
+    public StandardResponse<String> verify(Principal principal, String code) {
         VerificationEntity entity = verificationRepository.findByUserEmail(principal.getName())
                 .orElseThrow(() -> new DataNotFoundException("Verification code Not Found!"));
 
@@ -146,15 +155,15 @@ public class UserService {
                 user.setState(UserState.ACTIVE);
                 userRepository.save(user);
                 verificationRepository.delete(entity);
-                return "Successfully Verified!";
+                return StandardResponse.<String>builder().status("200").message("Successfully Verified!").build();
             }
             verificationRepository.delete(entity);
-            return "Verification code has expired!";
+            throw new UserBadRequestException("Verification Code has Expired!");
         }
-        return "Wrong Verification Code!";
+        throw new UserBadRequestException("Wrong Verification Code!");
     }
 
-    public void forgottenPassword(String  email) {
+    public StandardResponse<String> forgottenPassword(String  email) {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
         Optional<VerificationEntity> byUserEmail = verificationRepository.findByUserEmail(email);
@@ -162,29 +171,31 @@ public class UserService {
             verificationRepository.delete(byUserEmail.orElseThrow());
         }
         sendVerificationCode(email);
+        return StandardResponse.<String>builder().status("200").message("Verification code has been sent").build();
     }
 
-    public String verifyPasswordForUpdatePassword(VerifyCodeDto verifyCodeDto) {
+    public StandardResponse<String> verifyPasswordForUpdatePassword(VerifyCodeDto verifyCodeDto) {
         VerificationEntity entity = verificationRepository.findByUserEmail(verifyCodeDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("Verification code doesn't exists or expired"));
 
         if (verifyCodeDto.getCode().equals(entity.getCode())) {
             if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
-                return "Successfully verified";
+                return StandardResponse.<String>builder().status("200").message("Successfully verified").build();
             }
+            verificationRepository.delete(entity);
             throw new UserBadRequestException("Verification Code has Expired!");
         }
         throw new UserBadRequestException("Wrong Verification Code!");
     }
 
-    public String updatePassword(UpdatePasswordDto updatePasswordDto) {
+    public StandardResponse<String> updatePassword(UpdatePasswordDto updatePasswordDto) {
         UserEntity user = userRepository.findByEmail(updatePasswordDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
         user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
         user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
-        return "Successfully updated";
+        return StandardResponse.<String>builder().status("200").message("Successfully updated").build();
     }
 
     public String generateVerificationCode() {
@@ -201,16 +212,21 @@ public class UserService {
         }
     }
 
-    public JwtResponse getNewAccessToken(Principal principal) {
+    public StandardResponse<JwtResponse> getNewAccessToken(Principal principal) {
         UserEntity userEntity = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new DataNotFoundException("user not found"));
         String accessToken = jwtService.generateAccessToken(userEntity);
-        return JwtResponse.builder().accessToken(accessToken).build();
+        JwtResponse jwtResponse = JwtResponse.builder().accessToken(accessToken).build();
+        return StandardResponse.<JwtResponse>builder().status("200").message("Access token successfully sent").data(jwtResponse).build();
     }
-    public UserEntity findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
+    public String sendId(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found")).getId().toString();
     }
-    public UserEntity findById(UUID userId){
-        return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
+    public StandardResponse<UserEntity> getMeByEmail(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
+        return StandardResponse.<UserEntity>builder().status("200").message("User entity").data(userEntity).build();
+    }
+    public String sendEmail(UUID userId){
+        return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();
     }
 }

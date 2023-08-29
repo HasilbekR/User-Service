@@ -5,6 +5,7 @@ import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
@@ -45,9 +46,8 @@ public class RoleService {
     @Value("${services.get-hospital}")
     private String getHospitalId;
 
-    public RoleEntity save(RoleDto roleDto) {
+    public StandardResponse<RoleEntity> save(RoleDto roleDto) {
         RoleEntity roleEntityByName = roleRepository.findRoleEntitiesByName(roleDto.getName());
-        List<String> roleDtoPermissions = roleDto.getPermissions();
         // If role already exists
         if (roleEntityByName != null) throw new UniqueObjectException("Role already exists");
         // If role doesn't exists in db
@@ -65,14 +65,16 @@ public class RoleService {
             }
         }
         RoleEntity roleEntity = RoleEntity.builder().name(roleDto.getName()).permissions(rolePermission).build();
-        return roleRepository.save(roleEntity);
+        roleEntity = roleRepository.save(roleEntity);
+        return StandardResponse.<RoleEntity>builder().status("200").message("Role successfully created").data(roleEntity).build();
     }
 
-    public RoleEntity getRole(String name) {
-        return roleRepository.findRoleEntityByName(name).orElseThrow(() -> new DataNotFoundException("Role not found"));
+    public StandardResponse<RoleEntity> getRole(String name) {
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(name).orElseThrow(() -> new DataNotFoundException("Role not found"));
+        return StandardResponse.<RoleEntity>builder().status("200").message("Role successfully sent").data(roleEntity).build();
     }
 
-    public RoleEntity update(RoleDto roleDto) {
+    public StandardResponse<RoleEntity> update(RoleDto roleDto) {
         RoleEntity roleEntityByName = roleRepository.findRoleEntityByName(roleDto.getName()).orElseThrow(() -> new DataNotFoundException("Role not found"));
 
         if(roleDto.getPermissions() != null) {
@@ -89,10 +91,13 @@ public class RoleService {
             roleEntityByName.setPermissions(updatedPermissions);
         }
         roleEntityByName.setUpdatedDate(LocalDateTime.now());
-        return roleRepository.save(roleEntityByName);
+        return StandardResponse.<RoleEntity>builder().status("200")
+                .message("Permissions successfully added to the role")
+                .data(roleRepository.save(roleEntityByName))
+                .build();
     }
 
-    public String assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
+    public StandardResponse<String> assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
         if(Objects.equals(roleAssignDto.getName(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
         RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
@@ -120,10 +125,10 @@ public class RoleService {
         user.setPermissions(permissionList);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
         userRepository.save(user);
-        return user.getEmail();
+        return StandardResponse.<String>builder().status("200").message("Role successfully assigned to " + user.getEmail()).build();
     }
 
-    public String addPermissionsToUser(RoleAssignDto roleAssignDto) {
+    public StandardResponse<String> addPermissionsToUser(RoleAssignDto roleAssignDto) {
         RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
 
@@ -149,9 +154,9 @@ public class RoleService {
 
         user.setPermissions(permissionList);
         userRepository.save(user);
-        return user.getEmail();
+        return StandardResponse.<String>builder().status("200").message("Permissions successfully added to "+user.getEmail()).build();
     }
-    public void assignHospital(HospitalAssignDto hospitalAssignDto){
+    public StandardResponse<String> assignHospital(HospitalAssignDto hospitalAssignDto){
         UserEntity user = userRepository.findByEmail(hospitalAssignDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
         UUID hospitalId = checkHospitalId(hospitalAssignDto.getHospitalId());
@@ -165,6 +170,7 @@ public class RoleService {
         user.setRoles(roles);
         user.setEmployeeOfHospital(hospitalId);
         userRepository.save(user);
+        return StandardResponse.<String>builder().status("200").message("Hospital assigned successfully").build();
     }
     public UUID checkHospitalId(UUID id) {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(id.toString());
@@ -179,9 +185,12 @@ public class RoleService {
                 String.class);
         return UUID.fromString(Objects.requireNonNull(response.getBody()));
     }
-    public DoctorSpecialty saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
+    public StandardResponse<DoctorSpecialty> saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
         DoctorSpecialty specialty = modelMapper.map(doctorSpecialtyDto, DoctorSpecialty.class);
-        return doctorSpecialtyRepository.save(specialty);
+        return StandardResponse.<DoctorSpecialty>builder().status("200")
+                .message("Doctor specialty created successfully")
+                .data(doctorSpecialtyRepository.save(specialty))
+                .build();
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
@@ -76,7 +77,7 @@ class DoctorServiceTest {
 
         when(permissionRepository.findPermissionEntitiesByPermissionIn(anyList())).thenReturn(new ArrayList<>());
 
-        UserEntity result = doctorService.saveDoctor(doctorCreateDto, bindingResult, principal);
+        StandardResponse<UserEntity> result = doctorService.saveDoctor(doctorCreateDto, bindingResult, principal);
 
         assertNotNull(result);
         verify(userRepository, times(1)).findByEmail(anyString());
@@ -93,7 +94,7 @@ class DoctorServiceTest {
                 .thenReturn(new PageImpl<>(new ArrayList<>()));
 
 
-        List<UserEntity> result = doctorService.getAllDoctor(page, size, hospitalId);
+        StandardResponse<List<UserEntity>> result = doctorService.getAllDoctor(page, size, hospitalId);
 
         assertNotNull(result);
         verify(userRepository, times(1)).getAllDoctorsFromHospital(any(UUID.class), any());
@@ -115,11 +116,11 @@ class DoctorServiceTest {
         ResponseEntity<String> mockResponse = new ResponseEntity<>("Success", HttpStatus.OK);
         when(restTemplate.exchange(any(), any(), any(), eq(String.class))).thenReturn(mockResponse);
 
-        ResponseEntity<String> response = doctorService.setAvailability(doctorAvailability, principal, bindingResult);
+        StandardResponse<String> response = doctorService.setAvailability(doctorAvailability, principal, bindingResult);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Success", response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals("Success", response.getMessage());
 
         verify(userRepository, times(1)).findByEmail(anyString());
         verify(restTemplate, times(1)).exchange(any(), any(), any(), eq(String.class));
@@ -132,7 +133,7 @@ class DoctorServiceTest {
 
         when(userRepository.getDoctorByEmail(email)).thenReturn(Optional.of(new UserEntity()));
 
-        HttpStatus result = doctorService.updateDoctorStatus(email, status);
+        StandardResponse<String> result = doctorService.updateDoctorStatus(email, status);
 
         assertEquals(HttpStatus.OK, result);
 
@@ -151,7 +152,7 @@ class DoctorServiceTest {
         when(userRepository.getDoctorByEmail(email)).thenReturn(Optional.of(userEntity));
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 
-        HttpStatus result = doctorService.deleteDoctorFromHospital(email);
+        StandardResponse<String> result = doctorService.deleteDoctorFromHospital(email);
 
         assertEquals(HttpStatus.OK, result);
 

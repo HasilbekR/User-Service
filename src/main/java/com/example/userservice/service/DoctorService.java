@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
@@ -46,7 +47,7 @@ public class DoctorService {
     private String createTimeSlots;
 
 
-    public UserEntity saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult,Principal principal){
+    public StandardResponse<UserEntity> saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult, Principal principal){
         if (bindingResult.hasErrors()) {
             List<ObjectError> errors = bindingResult.getAllErrors();
             throw new RequestValidationException(errors);
@@ -71,29 +72,36 @@ public class DoctorService {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow();
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
 
-        return userRepository.save(user);
+        return StandardResponse.<UserEntity>builder().status("200")
+                .message("Doctor successfully added")
+                .data(userRepository.save(user))
+                .build();
     }
-    public List<UserEntity> getAllDoctor(int page,int size, UUID hospitalId){
+    public StandardResponse<List<UserEntity>> getAllDoctor(int page,int size, UUID hospitalId){
         Sort sort = Sort.by(Sort.Direction.ASC,"fullName");
         Pageable pageable = PageRequest.of(page,size,sort);
-        return userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
+        return StandardResponse.<List<UserEntity>>builder().status("200")
+                .message("Doctor list "+page+"-page")
+                .data(userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent())
+                .build();
     }
-    public HttpStatus updateDoctorStatus(String email, DoctorStatus status) {
+    public StandardResponse<String> updateDoctorStatus(String email, DoctorStatus status) {
         userRepository.getDoctorByEmail(email).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
         doctorRepository.update(status, email);
-        return HttpStatus.OK;
+        return StandardResponse.<String>builder().status("200").message("Doctor status updated").build();
     }
-    public List<String> getDoctorSpecialtiesFromHospital(UUID hospitalId){
-        return userRepository.getAllSpecialtiesFromHospital(hospitalId);
+    public StandardResponse<List<String>> getDoctorSpecialtiesFromHospital(UUID hospitalId){
+        return StandardResponse.<List<String>>builder().status("200")
+                .message("List of specialties that exist in hospital")
+                .data(userRepository.getAllSpecialtiesFromHospital(hospitalId))
+                .build();
     }
 
-    public HttpStatus deleteDoctorFromHospital(String email) {
+    public StandardResponse<String> deleteDoctorFromHospital(String email) {
         UserEntity user = userRepository.getDoctorByEmail(email).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
-        DoctorInfo doctorInfo = user.getDoctorInfo();
         user.setEmployeeOfHospital(null);
-        user.setDoctorInfo(doctorInfo);
         userRepository.save(user);
-        return HttpStatus.OK;
+        return StandardResponse.<String>builder().status("200").message("Doctor has been fired from hospital").build();
     }
     public List<RoleEntity> getRolesString(List<String> roles) {
         return roleRepository.findRoleEntitiesByNameIn(roles);
@@ -109,7 +117,7 @@ public class DoctorService {
         }
     }
 
-    public ResponseEntity<String> setAvailability(DoctorAvailability doctorAvailability, Principal principal, BindingResult bindingResult) {
+    public StandardResponse<String> setAvailability(DoctorAvailability doctorAvailability, Principal principal, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new RequestValidationException(bindingResult.getAllErrors());
         }
@@ -121,11 +129,11 @@ public class DoctorService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DoctorAvailability> entity = new HttpEntity<>(doctorAvailability, httpHeaders);
-        ResponseEntity<String> response = restTemplate.exchange(
+        restTemplate.exchange(
                 URI.create(createTimeSlots),
                 HttpMethod.POST,
                 entity,
                 String.class);
-        return response;
+        return StandardResponse.<String>builder().status("200").message("Time slots created for doctor "+doctorEntity.getFullName()+" for "+doctorAvailability.getDay()).build();
     }
 }
