@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,9 @@ public class AuthControllerTest {
     public void testSignUp() throws Exception {
         UserRequestDto userDto = new UserRequestDto();
 
-        when(userService.save(any(UserRequestDto.class))).thenReturn(new UserDetailsForFront());
+        StandardResponse<JwtResponse> mockResponse = StandardResponse.<JwtResponse>builder().build();
+
+        when(userService.save(any(UserRequestDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)

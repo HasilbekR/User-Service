@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
@@ -82,7 +83,7 @@ public class UserServiceTest {
         when(roleService.save(any(RoleDto.class))).thenReturn(roleEntity);
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 
-        UserDetailsForFront result = userService.save(userRequestDto);
+        StandardResponse<JwtResponse> result = userService.save(userRequestDto);
 
         assertNotNull(result);
         assertEquals(UserState.UNVERIFIED, userEntity.getState());
