@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     public StandardResponse<String> authenticationFailedExceptionHandler(
             AuthenticationFailedException e
     ){
-        return StandardResponse.<String>builder().status("401").message(e.getMessage()).build();
+        return StandardResponse.<String>builder().status("401").message(e.getMessage()).data(e.getMessage()).build();
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public StandardResponse<String> AccessDeniedExceptionHandler(
