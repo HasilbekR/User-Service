@@ -52,8 +52,9 @@ public class AuthControllerTest {
     @Test
     public void testSignIn() throws Exception {
         LoginRequestDto loginDto = new LoginRequestDto();
+        StandardResponse<JwtResponse> mockResponse = StandardResponse.<JwtResponse>builder().build();
 
-        when(userService.signIn(any(LoginRequestDto.class))).thenReturn(new JwtResponse());
+        when(userService.signIn(any(LoginRequestDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/auth/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,8 +66,9 @@ public class AuthControllerTest {
     public void testVerify() throws Exception {
         String code = "12345";
         String principalName = "example@example.com";
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
 
-        when(userService.verify(any(Principal.class), anyString())).thenReturn("Verification successful");
+        when(userService.verify(any(Principal.class), anyString())).thenReturn(mockResponse);
 
         mockMvc.perform(get("/user/auth/verify")
                         .param("code", code)
@@ -91,8 +93,9 @@ public class AuthControllerTest {
         String principalName = "example@example.com";
 
         JwtResponse jwtResponse = new JwtResponse();
+        StandardResponse<JwtResponse> mockResponse = StandardResponse.<JwtResponse>builder().build();
 
-        when(userService.getNewAccessToken(any(Principal.class))).thenReturn(jwtResponse);
+        when(userService.getNewAccessToken(any(Principal.class))).thenReturn(mockResponse);
 
         mockMvc.perform(get("/user/auth/access-token")
                         .principal(new TestPrincipal(principalName)))
@@ -105,10 +108,9 @@ public class AuthControllerTest {
         String principalName = "example@example.com";
 
         JwtResponse jwtResponse = new JwtResponse();
+        StandardResponse<JwtResponse> mockResponse = StandardResponse.<JwtResponse>builder().build();
 
-
-
-        when(userService.getNewAccessToken(any(Principal.class))).thenReturn(jwtResponse);
+        when(userService.getNewAccessToken(any(Principal.class))).thenReturn(mockResponse);
 
         mockMvc.perform(get("/user/auth/refresh-token")
                         .principal(new TestPrincipal(principalName)))
@@ -130,8 +132,10 @@ public class AuthControllerTest {
     public void testVerifyCodeForUpdatePassword() throws Exception {
         VerifyCodeDto verifyCodeDto = new VerifyCodeDto();
 
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
+
         when(userService.verifyPasswordForUpdatePassword(any(VerifyCodeDto.class)))
-                .thenReturn("Verification successful");
+                .thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/auth/verify-code-for-update-password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,8 +147,9 @@ public class AuthControllerTest {
     @Test
     public void testUpdatePassword() throws Exception {
         UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
 
-        when(userService.updatePassword(any(UpdatePasswordDto.class))).thenReturn("Password updated successfully");
+        when(userService.updatePassword(any(UpdatePasswordDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(put("/user/auth/update-password")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -78,9 +78,10 @@ public class UserServiceTest {
         UserEntity userEntity = new UserEntity();
         RoleEntity roleEntity = new RoleEntity();
         roleEntity.setName("USER");
+        StandardResponse<RoleEntity> mockResponse = StandardResponse.<RoleEntity>builder().build();
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(roleService.save(any(RoleDto.class))).thenReturn(roleEntity);
+        when(roleService.save(any(RoleDto.class))).thenReturn(mockResponse);
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 
         StandardResponse<JwtResponse> result = userService.save(userRequestDto);
@@ -133,11 +134,11 @@ public class UserServiceTest {
         when(jwtService.generateAccessToken(any(UserEntity.class))).thenReturn("accessToken");
         when(jwtService.generateRefreshToken(any(UserEntity.class))).thenReturn("refreshToken");
 
-        JwtResponse result = userService.signIn(loginRequestDto);
+        StandardResponse<JwtResponse> result = userService.signIn(loginRequestDto);
 
         assertNotNull(result);
-        assertEquals("accessToken", result.getAccessToken());
-        assertEquals("refreshToken", result.getRefreshToken());
+        assertEquals("accessToken", result.getData().getAccessToken());
+        assertEquals("refreshToken", result.getData().getRefreshToken());
 
         verify(userRepository, times(1)).findByEmail(loginRequestDto.getEmail());
     }
@@ -151,10 +152,10 @@ public class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
 
-        UserEntity result = userService.updateProfile(userId, update);
+        StandardResponse<UserEntity> result = userService.updateProfile(userId, update);
 
         assertNotNull(result);
-        assertEquals("Updated", result.getFullName());
+        assertEquals("Updated", result.getData().getFullName());
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).save(userEntity);
@@ -168,7 +169,7 @@ public class UserServiceTest {
         List<UserEntity> userList = new ArrayList<>();
         when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(userList));
 
-        List<UserEntity> result = userService.getAll(page, size);
+        StandardResponse<List<UserEntity>> result = userService.getAll(page, size);
 
         assertNotNull(result);
         assertEquals(userList, result);
@@ -197,7 +198,7 @@ public class UserServiceTest {
 
         when(verificationRepository.findByUserEmail(principal.getName())).thenReturn(Optional.of(verificationEntity));
 
-        String result = userService.verify(principal, code);
+        StandardResponse<String> result = userService.verify(principal, code);
 
         assertNotNull(result);
         assertEquals("Successfully Verified!", result);
@@ -235,7 +236,7 @@ public class UserServiceTest {
 
         when(verificationRepository.findByUserEmail(verifyCodeDto.getEmail())).thenReturn(Optional.of(verificationEntity));
 
-        String result = userService.verifyPasswordForUpdatePassword(verifyCodeDto);
+        StandardResponse<String> result = userService.verifyPasswordForUpdatePassword(verifyCodeDto);
 
         assertNotNull(result);
         assertEquals("Successfully verified", result);
@@ -251,7 +252,7 @@ public class UserServiceTest {
         UserEntity userEntity = new UserEntity();
         when(userRepository.findByEmail(updatePasswordDto.getEmail())).thenReturn(Optional.of(userEntity));
 
-        String result = userService.updatePassword(updatePasswordDto);
+        StandardResponse<String> result = userService.updatePassword(updatePasswordDto);
 
         assertNotNull(result);
         assertEquals("Successfully updated", result);
@@ -310,10 +311,10 @@ public class UserServiceTest {
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(jwtService.generateAccessToken(userEntity)).thenReturn("generatedAccessToken");
 
-        JwtResponse result = userService.getNewAccessToken(principal);
+        StandardResponse<JwtResponse> result = userService.getNewAccessToken(principal);
 
         assertNotNull(result);
-        assertEquals("generatedAccessToken", result.getAccessToken());
+        assertEquals("generatedAccessToken", result.getData().getAccessToken());
 
         verify(userRepository, times(1)).findByEmail(userEmail);
         verify(jwtService, times(1)).generateAccessToken(userEntity);
@@ -325,26 +326,12 @@ public class UserServiceTest {
         UserEntity userEntity = new UserEntity();
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userEntity));
 
-        UserEntity result = userService.findByEmail(userEmail);
+        StandardResponse<UserEntity> result = userService.getMeByEmail(userEmail);
 
         assertNotNull(result);
         assertSame(userEntity, result);
 
         verify(userRepository, times(1)).findByEmail(userEmail);
-    }
-
-    @Test
-    public void testFindById() {
-        UUID userId = UUID.randomUUID();
-        UserEntity userEntity = new UserEntity();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
-
-        UserEntity result = userService.findById(userId);
-
-        assertNotNull(result);
-        assertSame(userEntity, result);
-
-        verify(userRepository, times(1)).findById(userId);
     }
 
 

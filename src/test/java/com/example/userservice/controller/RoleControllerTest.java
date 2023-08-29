@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.service.RoleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,8 +41,9 @@ public class RoleControllerTest {
     @WithMockUser(roles = "SUPER_ADMIN")
     public void testCreateRole() throws Exception {
         RoleDto roleDto = new RoleDto();
+        StandardResponse<RoleEntity> mockResponse = StandardResponse.<RoleEntity>builder().build();
 
-        when(roleService.save(any(RoleDto.class))).thenReturn(new RoleEntity());
+        when(roleService.save(any(RoleDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/user/role/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,8 +56,9 @@ public class RoleControllerTest {
     @WithMockUser(roles = "SUPER_ADMIN")
     public void testGetRole() throws Exception {
         String roleName = "ADMIN";
+        StandardResponse<RoleEntity> mockResponse = StandardResponse.<RoleEntity>builder().build();
 
-        when(roleService.getRole(anyString())).thenReturn(new RoleEntity());
+        when(roleService.getRole(anyString())).thenReturn(mockResponse);
 
         mockMvc.perform(get("/user/role/get-role")
                         .param("name", roleName))
@@ -66,8 +69,9 @@ public class RoleControllerTest {
     @WithMockUser(roles = "SUPER_ADMIN")
     public void testUpdatePermissionsToRole() throws Exception {
         RoleDto roleDto = new RoleDto();
+        StandardResponse<RoleEntity> mockResponse = StandardResponse.<RoleEntity>builder().build();
 
-        when(roleService.update(any(RoleDto.class))).thenReturn(new RoleEntity());
+        when(roleService.update(any(RoleDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(put("/user/role/add-permissions-to-role")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,10 +86,10 @@ public class RoleControllerTest {
         RoleAssignDto roleAssignDto = new RoleAssignDto();
 
         String expectedResult = "Role successfully assigned to User";
+        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
 
         when(roleService.assignRoleToUser(any(RoleAssignDto.class), any(Principal.class)))
-                .thenReturn("User");
-
+                .thenReturn(mockResponse);
         mockMvc.perform(post("/user/role/assign-role-to-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(roleAssignDto)))
