@@ -3,6 +3,7 @@ package com.example.userservice.service;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
@@ -42,7 +43,7 @@ public class UserService {
     private final RoleRepository roleRepository;
 
 
-    public UserDetailsForFront save(UserRequestDto userRequestDto) {
+    public StandardResponse<JwtResponse> save(UserRequestDto userRequestDto) {
         checkUserEmailAndPhoneNumber(userRequestDto.getEmail(), userRequestDto.getPhoneNumber());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -63,8 +64,19 @@ public class UserService {
             throw new DataNotFoundException("Gender not found");
         }
         userEntity.setGender(Gender.valueOf(userRequestDto.getGender()));
-        UserEntity user = userRepository.save(userEntity);
-        return mappingUser(user);
+        userEntity = userRepository.save(userEntity);
+        String accessToken = jwtService.generateAccessToken(userEntity);
+        String refreshToken = jwtService.generateRefreshToken(userEntity);
+        UserDetailsForFront user = mappingUser(userEntity);
+        JwtResponse jwtResponse = JwtResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(user)
+                .build();
+        return StandardResponse.<JwtResponse> builder()
+                .status("200")
+                .message("Successfully signed up")
+                .data(jwtResponse).build();
     }
     public UserDetailsForFront mappingUser(UserEntity userEntity){
         UserDetailsForFront map = modelMapper.map(userEntity, UserDetailsForFront.class);

@@ -2,6 +2,7 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
+import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserDetailsForFront> signUp(
+    public StandardResponse<JwtResponse> signUp(
             @Valid @RequestBody UserRequestDto userDto,
             BindingResult bindingResult
     ) throws RequestValidationException {
@@ -29,7 +30,7 @@ public class AuthController {
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             throw new RequestValidationException(allErrors);
         }
-        return ResponseEntity.ok(userService.save(userDto));
+        return userService.save(userDto);
     }
 
     @PostMapping("/sign-in")
