@@ -12,18 +12,19 @@ import java.nio.file.AccessDeniedException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {RequestValidationException.class})
-    public StandardResponse<String> requestValidationExceptionHandler(
+    public ResponseEntity<StandardResponse<String>>
+            requestValidationExceptionHandler(
             RequestValidationException e
     ){
-        return StandardResponse.<String>builder().status("400").message(e.getMessage()).build();
+        return ResponseEntity.ok().body(StandardResponse.<String>builder().status("400").message(e.getMessage()).build());
     }
 
     @ExceptionHandler(value = {AuthenticationFailedException.class})
-    public ResponseEntity<String> authenticationFailedExceptionHandler(
+    public ResponseEntity<StandardResponse<String>> authenticationFailedExceptionHandler(
             AuthenticationFailedException e
     ){
-//        return StandardResponse.<String>builder().status("401").message(e.getMessage()).data(e.getMessage()).build();
-        return ResponseEntity.status(401).body(e.getMessage());
+        return ResponseEntity.ok().body(StandardResponse.<String>builder().status("401").message(e.getMessage()).build());
+
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public StandardResponse<String> AccessDeniedExceptionHandler(
