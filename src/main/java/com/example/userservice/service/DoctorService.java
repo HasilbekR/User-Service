@@ -97,6 +97,12 @@ public class DoctorService {
                 .data(userRepository.getAllSpecialtiesFromHospital(hospitalId))
                 .build();
     }
+    public StandardResponse<List<UserEntity>> getDoctorsBySpecialty(UUID hospitalId, String specialty){
+        return StandardResponse.<List<UserEntity>>builder().status(Status.SUCCESS)
+                .message("List of doctors by "+specialty+" specialty")
+                .data(userRepository.getAllDoctorsBySpecialty(hospitalId, specialty))
+                .build();
+    }
 
     public StandardResponse<String> deleteDoctorFromHospital(String email) {
         UserEntity user = userRepository.getDoctorByEmail(email).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
