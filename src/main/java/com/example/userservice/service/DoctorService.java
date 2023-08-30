@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
+import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,10 +99,20 @@ public class DoctorService {
                 .data(userRepository.getAllSpecialtiesFromHospital(hospitalId))
                 .build();
     }
-    public StandardResponse<List<UserEntity>> getDoctorsBySpecialty(UUID hospitalId, String specialty){
-        return StandardResponse.<List<UserEntity>>builder().status(Status.SUCCESS)
+    public StandardResponse<List<DoctorDetailsForFront>> getDoctorsBySpecialty(UUID hospitalId, String specialty){
+        List<UserEntity> doctors = userRepository.getAllDoctorsBySpecialty(hospitalId, specialty);
+        List<DoctorDetailsForFront> doctorDetailsForFronts = new ArrayList<>();
+        for (UserEntity doctor : doctors) {
+            doctorDetailsForFronts.add(DoctorDetailsForFront.builder().id(doctor.getId())
+                    .fullName(doctor.getFullName())
+                    .info(doctor.getDoctorInfo().getInfo())
+                    .roomNumber(doctor.getDoctorInfo().getRoomNumber())
+                    .build());
+        }
+
+        return StandardResponse.<List<DoctorDetailsForFront>>builder().status(Status.SUCCESS)
                 .message("List of doctors by "+specialty+" specialty")
-                .data(userRepository.getAllDoctorsBySpecialty(hospitalId, specialty))
+                .data(doctorDetailsForFronts)
                 .build();
     }
 

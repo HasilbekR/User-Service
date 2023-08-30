@@ -2,6 +2,7 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -88,7 +89,7 @@ public class UserController {
         return doctorService.getDoctorSpecialtiesFromHospital(hospitalId);
     }
     @GetMapping("/get-doctors-by-specialty")
-    public StandardResponse<List<UserEntity>> getDoctors(
+    public StandardResponse<List<DoctorDetailsForFront>> getDoctors(
             @RequestParam String specialty,
             @RequestParam UUID hospitalId
     ){
