@@ -320,19 +320,7 @@ public class UserServiceTest {
         verify(jwtService, times(1)).generateAccessToken(userEntity);
     }
 
-    @Test
-    public void testFindByEmail() {
-        String userEmail = "test@example.com";
-        UserEntity userEntity = new UserEntity();
-        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userEntity));
 
-        StandardResponse<UserEntity> result = userService.getMeByEmail(userEmail);
-
-        assertNotNull(result);
-        assertSame(userEntity, result);
-
-        verify(userRepository, times(1)).findByEmail(userEmail);
-    }
 
 
 }

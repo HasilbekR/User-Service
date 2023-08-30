@@ -4,6 +4,7 @@ import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
+import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -69,10 +70,10 @@ public class UserController {
     }
 
     @GetMapping("/get-me")
-    public StandardResponse<UserEntity> getMe(
-            @RequestParam String email
+    public StandardResponse<UserDetailsForFront> getMe(
+            @RequestParam Principal principal
     ){
-        return userService.getMeByEmail(email);
+        return userService.getMeByToken(principal);
     }
 
     @GetMapping("/get-all-doctors-from-hospital")

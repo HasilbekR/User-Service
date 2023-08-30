@@ -224,9 +224,9 @@ public class UserService {
     public String sendId(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found")).getId().toString();
     }
-    public StandardResponse<UserEntity> getMeByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
-        return StandardResponse.<UserEntity>builder().status(Status.SUCCESS).message("User entity").data(userEntity).build();
+    public StandardResponse<UserDetailsForFront> getMeByToken(Principal principal) {
+        UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
+        return StandardResponse.<UserDetailsForFront>builder().status(Status.SUCCESS).message("User entity").data(mappingUser(userEntity)).build();
     }
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();

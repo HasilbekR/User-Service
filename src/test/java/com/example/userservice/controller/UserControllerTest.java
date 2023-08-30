@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
+import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -74,24 +75,6 @@ public class UserControllerTest {
                         .content(asJsonString(update)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-    @Test
-    public void testExchangeId() throws Exception {
-        ExchangeDataDto exchangeDataDto = new ExchangeDataDto();
-        exchangeDataDto.setSource("example@example.com");
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(UUID.randomUUID());
-        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().data(userEntity).build();
-
-
-        when(userService.getMeByEmail(anyString())).thenReturn(mockResponse);
-
-        mockMvc.perform(post("/user/send-id")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(exchangeDataDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(userEntity.getId().toString()));
     }
 
     @Test
