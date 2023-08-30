@@ -2,6 +2,7 @@ package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
+import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -80,39 +81,42 @@ public class DoctorService {
                 .data(userRepository.save(user))
                 .build();
     }
-    public StandardResponse<List<UserEntity>> getAllDoctor(int page,int size, UUID hospitalId){
+    public StandardResponse<DoctorsWithSpecialtiesForFront> getAllDoctor(int page,int size, UUID hospitalId){
         Sort sort = Sort.by(Sort.Direction.ASC,"fullName");
         Pageable pageable = PageRequest.of(page,size,sort);
-        return StandardResponse.<List<UserEntity>>builder().status(Status.SUCCESS)
+        List<UserEntity> doctors = userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent();
+        DoctorsWithSpecialtiesForFront doctorsWithSpecialtiesForFront = DoctorsWithSpecialtiesForFront.builder()
+                .doctors(mapDoctor(doctors))
+                .specialties(getDoctorSpecialtiesFromHospital(hospitalId)).build();
+        return StandardResponse.<DoctorsWithSpecialtiesForFront>builder().status(Status.SUCCESS)
                 .message("Doctor list "+page+"-page")
-                .data(userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent())
+                .data(doctorsWithSpecialtiesForFront)
                 .build();
+    }
+    public List<DoctorDetailsForFront> mapDoctor(List<UserEntity> doctors){
+        List<DoctorDetailsForFront> doctorDetailsForFronts = new ArrayList<>();
+        for (UserEntity doctor : doctors) {
+            doctorDetailsForFronts.add(DoctorDetailsForFront.builder()
+                    .id(doctor.getId())
+                    .fullName(doctor.getFullName())
+                    .specialty(doctor.getDoctorInfo().getDoctorSpecialty().getName())
+                    .build());
+        }
+        return doctorDetailsForFronts;
     }
     public StandardResponse<String> updateDoctorStatus(String email, DoctorStatus status) {
         userRepository.getDoctorByEmail(email).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
         doctorRepository.update(status, email);
         return StandardResponse.<String>builder().status(Status.SUCCESS).message("Doctor status updated").build();
     }
-    public StandardResponse<List<String>> getDoctorSpecialtiesFromHospital(UUID hospitalId){
-        return StandardResponse.<List<String>>builder().status(Status.SUCCESS)
-                .message("List of specialties that exist in hospital")
-                .data(userRepository.getAllSpecialtiesFromHospital(hospitalId))
-                .build();
+    public List<String> getDoctorSpecialtiesFromHospital(UUID hospitalId){
+        return userRepository.getAllSpecialtiesFromHospital(hospitalId);
     }
     public StandardResponse<List<DoctorDetailsForFront>> getDoctorsBySpecialty(UUID hospitalId, String specialty){
         List<UserEntity> doctors = userRepository.getAllDoctorsBySpecialty(hospitalId, specialty);
-        List<DoctorDetailsForFront> doctorDetailsForFronts = new ArrayList<>();
-        for (UserEntity doctor : doctors) {
-            doctorDetailsForFronts.add(DoctorDetailsForFront.builder().id(doctor.getId())
-                    .fullName(doctor.getFullName())
-                    .info(doctor.getDoctorInfo().getInfo())
-                    .roomNumber(doctor.getDoctorInfo().getRoomNumber())
-                    .build());
-        }
-
         return StandardResponse.<List<DoctorDetailsForFront>>builder().status(Status.SUCCESS)
                 .message("List of doctors by "+specialty+" specialty")
-                .data(doctorDetailsForFronts)
+                .data(mapDoctor(doctors))
                 .build();
     }
 

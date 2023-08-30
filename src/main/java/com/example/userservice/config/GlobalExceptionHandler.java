@@ -3,6 +3,7 @@ package com.example.userservice.config;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.exception.*;
+import jakarta.ws.rs.InternalServerErrorException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +26,6 @@ public class GlobalExceptionHandler {
             AuthenticationFailedException e
     ){
         return ResponseEntity.status(401).body(StandardResponse.<String>builder().status(Status.ERROR).message(e.getMessage()).build());
-
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public ResponseEntity<StandardResponse<String>> AccessDeniedExceptionHandler(
@@ -50,5 +50,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<StandardResponse<String>> userBadRequestExceptionHandler(
             UserBadRequestException e){
         return ResponseEntity.status(400).body(StandardResponse.<String>builder().status(Status.ERROR).message(e.getMessage()).build());
+    }
+    @ExceptionHandler(value = {InternalServerErrorException.class})
+    public ResponseEntity<StandardResponse<String>> internalServerExceptionHandler(
+    ){
+        return ResponseEntity.status(401).body(StandardResponse.<String>builder().status(Status.ERROR).message("Data not exist").build());
+
     }
 }

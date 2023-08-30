@@ -1,6 +1,8 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
+import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
+import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
@@ -94,7 +96,7 @@ class DoctorServiceTest {
                 .thenReturn(new PageImpl<>(new ArrayList<>()));
 
 
-        StandardResponse<List<UserEntity>> result = doctorService.getAllDoctor(page, size, hospitalId);
+        StandardResponse<DoctorsWithSpecialtiesForFront> result = doctorService.getAllDoctor(page, size, hospitalId);
 
         assertNotNull(result);
         verify(userRepository, times(1)).getAllDoctorsFromHospital(any(UUID.class), any());

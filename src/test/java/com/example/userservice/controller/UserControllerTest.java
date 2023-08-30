@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
@@ -25,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
 
 @WebMvcTest(UserController.class)
@@ -97,7 +97,7 @@ public class UserControllerTest {
     @Test
     public void testGetAllDoctorsFromHospital() throws Exception {
         UUID hospitalId = UUID.randomUUID();
-        StandardResponse<List<UserEntity>> mockResponse = StandardResponse.<List<UserEntity>>builder().build();
+        StandardResponse<DoctorsWithSpecialtiesForFront> mockResponse = StandardResponse.<DoctorsWithSpecialtiesForFront>builder().build();
 
         when(doctorService.getAllDoctor(anyInt(), anyInt(), any(UUID.class)))
                 .thenReturn(mockResponse);

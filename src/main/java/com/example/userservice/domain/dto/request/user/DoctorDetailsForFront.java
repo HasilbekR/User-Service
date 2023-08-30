@@ -9,6 +9,5 @@ import java.util.UUID;
 public class DoctorDetailsForFront {
     private UUID id;
     private String fullName;
-    private String info;
-    private String roomNumber;
+    private String specialty;
 }
