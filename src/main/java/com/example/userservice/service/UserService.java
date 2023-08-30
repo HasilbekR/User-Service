@@ -4,6 +4,7 @@ import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
 import com.example.userservice.domain.dto.response.StandardResponse;
+import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.domain.entity.VerificationEntity;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
@@ -74,7 +75,7 @@ public class UserService {
                 .user(user)
                 .build();
         return StandardResponse.<JwtResponse> builder()
-                .status("200")
+                .status(Status.SUCCESS)
                 .message("Successfully signed up")
                 .data(jwtResponse).build();
     }
@@ -109,7 +110,7 @@ public class UserService {
                     .refreshToken(refreshToken)
                     .user(user)
                     .build();
-            return StandardResponse.<JwtResponse>builder().status("200").message("Successfully signed in").data(jwtResponse).build();
+            return StandardResponse.<JwtResponse>builder().status(Status.SUCCESS).message("Successfully signed in").data(jwtResponse).build();
         }else {
             throw new AuthenticationFailedException("Incorrect username or password");
         }
@@ -121,7 +122,7 @@ public class UserService {
         modelMapper.map(update, userEntity);
         userEntity.setUpdatedDate(LocalDateTime.now());
 
-        return StandardResponse.<UserEntity>builder().status("200")
+        return StandardResponse.<UserEntity>builder().status(Status.SUCCESS)
                 .message("User updated successfully")
                 .data(userRepository.save(userEntity))
                 .build();
@@ -129,7 +130,7 @@ public class UserService {
 
     public StandardResponse<List<UserEntity>> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return StandardResponse.<List<UserEntity>>builder().status("200")
+        return StandardResponse.<List<UserEntity>>builder().status(Status.SUCCESS)
                 .message("User list "+page+"-page")
                 .data(userRepository.findAll(pageable).getContent())
                 .build();
@@ -142,7 +143,7 @@ public class UserService {
                 .build();
         verificationRepository.save(verificationEntity);
         mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode());
-        return StandardResponse.<String>builder().status("200").message("Verification code has been sent").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
     }
 
     public StandardResponse<String> verify(Principal principal, String code) {
@@ -156,7 +157,7 @@ public class UserService {
                 user.setState(UserState.ACTIVE);
                 userRepository.save(user);
                 verificationRepository.delete(entity);
-                return StandardResponse.<String>builder().status("200").message("Successfully Verified!").build();
+                return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully Verified!").build();
             }
             verificationRepository.delete(entity);
             throw new UserBadRequestException("Verification Code has Expired!");
@@ -172,7 +173,7 @@ public class UserService {
             verificationRepository.delete(byUserEmail.orElseThrow());
         }
         sendVerificationCode(email);
-        return StandardResponse.<String>builder().status("200").message("Verification code has been sent").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
     }
 
     public StandardResponse<String> verifyPasswordForUpdatePassword(VerifyCodeDto verifyCodeDto) {
@@ -181,7 +182,7 @@ public class UserService {
 
         if (verifyCodeDto.getCode().equals(entity.getCode())) {
             if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
-                return StandardResponse.<String>builder().status("200").message("Successfully verified").build();
+                return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully verified").build();
             }
             verificationRepository.delete(entity);
             throw new UserBadRequestException("Verification Code has Expired!");
@@ -196,7 +197,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
         user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
-        return StandardResponse.<String>builder().status("200").message("Successfully updated").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully updated").build();
     }
 
     public String generateVerificationCode() {
@@ -218,14 +219,14 @@ public class UserService {
                 .orElseThrow(() -> new DataNotFoundException("user not found"));
         String accessToken = jwtService.generateAccessToken(userEntity);
         JwtResponse jwtResponse = JwtResponse.builder().accessToken(accessToken).build();
-        return StandardResponse.<JwtResponse>builder().status("200").message("Access token successfully sent").data(jwtResponse).build();
+        return StandardResponse.<JwtResponse>builder().status(Status.SUCCESS).message("Access token successfully sent").data(jwtResponse).build();
     }
     public String sendId(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found")).getId().toString();
     }
     public StandardResponse<UserEntity> getMeByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
-        return StandardResponse.<UserEntity>builder().status("200").message("User entity").data(userEntity).build();
+        return StandardResponse.<UserEntity>builder().status(Status.SUCCESS).message("User entity").data(userEntity).build();
     }
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();

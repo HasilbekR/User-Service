@@ -2,6 +2,7 @@ package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
+import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
@@ -72,7 +73,7 @@ public class DoctorService {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow();
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
 
-        return StandardResponse.<UserEntity>builder().status("200")
+        return StandardResponse.<UserEntity>builder().status(Status.SUCCESS)
                 .message("Doctor successfully added")
                 .data(userRepository.save(user))
                 .build();
@@ -80,7 +81,7 @@ public class DoctorService {
     public StandardResponse<List<UserEntity>> getAllDoctor(int page,int size, UUID hospitalId){
         Sort sort = Sort.by(Sort.Direction.ASC,"fullName");
         Pageable pageable = PageRequest.of(page,size,sort);
-        return StandardResponse.<List<UserEntity>>builder().status("200")
+        return StandardResponse.<List<UserEntity>>builder().status(Status.SUCCESS)
                 .message("Doctor list "+page+"-page")
                 .data(userRepository.getAllDoctorsFromHospital(hospitalId, pageable).getContent())
                 .build();
@@ -88,10 +89,10 @@ public class DoctorService {
     public StandardResponse<String> updateDoctorStatus(String email, DoctorStatus status) {
         userRepository.getDoctorByEmail(email).orElseThrow(()-> new DataNotFoundException("Doctor not found"));
         doctorRepository.update(status, email);
-        return StandardResponse.<String>builder().status("200").message("Doctor status updated").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Doctor status updated").build();
     }
     public StandardResponse<List<String>> getDoctorSpecialtiesFromHospital(UUID hospitalId){
-        return StandardResponse.<List<String>>builder().status("200")
+        return StandardResponse.<List<String>>builder().status(Status.SUCCESS)
                 .message("List of specialties that exist in hospital")
                 .data(userRepository.getAllSpecialtiesFromHospital(hospitalId))
                 .build();
@@ -101,7 +102,7 @@ public class DoctorService {
         UserEntity user = userRepository.getDoctorByEmail(email).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
         user.setEmployeeOfHospital(null);
         userRepository.save(user);
-        return StandardResponse.<String>builder().status("200").message("Doctor has been fired from hospital").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Doctor has been fired from hospital").build();
     }
     public List<RoleEntity> getRolesString(List<String> roles) {
         return roleRepository.findRoleEntitiesByNameIn(roles);
@@ -134,6 +135,6 @@ public class DoctorService {
                 HttpMethod.POST,
                 entity,
                 String.class);
-        return StandardResponse.<String>builder().status("200").message("Time slots created for doctor "+doctorEntity.getFullName()+" for "+doctorAvailability.getDay()).build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Time slots created for doctor "+doctorEntity.getFullName()+" for "+doctorAvailability.getDay()).build();
     }
 }

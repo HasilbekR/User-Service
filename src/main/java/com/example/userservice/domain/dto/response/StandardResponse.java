@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class StandardResponse<T> {
-    private String status;
+    private Status status;
     private String message;
     private T data;
 }

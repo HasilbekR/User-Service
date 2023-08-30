@@ -6,6 +6,7 @@ import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
+import com.example.userservice.domain.dto.response.Status;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
@@ -66,12 +67,12 @@ public class RoleService {
         }
         RoleEntity roleEntity = RoleEntity.builder().name(roleDto.getName()).permissions(rolePermission).build();
         roleEntity = roleRepository.save(roleEntity);
-        return StandardResponse.<RoleEntity>builder().status("200").message("Role successfully created").data(roleEntity).build();
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS).message("Role successfully created").data(roleEntity).build();
     }
 
     public StandardResponse<RoleEntity> getRole(String name) {
         RoleEntity roleEntity = roleRepository.findRoleEntityByName(name).orElseThrow(() -> new DataNotFoundException("Role not found"));
-        return StandardResponse.<RoleEntity>builder().status("200").message("Role successfully sent").data(roleEntity).build();
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS).message("Role successfully sent").data(roleEntity).build();
     }
 
     public StandardResponse<RoleEntity> update(RoleDto roleDto) {
@@ -91,7 +92,7 @@ public class RoleService {
             roleEntityByName.setPermissions(updatedPermissions);
         }
         roleEntityByName.setUpdatedDate(LocalDateTime.now());
-        return StandardResponse.<RoleEntity>builder().status("200")
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS)
                 .message("Permissions successfully added to the role")
                 .data(roleRepository.save(roleEntityByName))
                 .build();
@@ -125,7 +126,7 @@ public class RoleService {
         user.setPermissions(permissionList);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
         userRepository.save(user);
-        return StandardResponse.<String>builder().status("200").message("Role successfully assigned to " + user.getEmail()).build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Role successfully assigned to " + user.getEmail()).build();
     }
 
     public StandardResponse<String> addPermissionsToUser(RoleAssignDto roleAssignDto) {
@@ -154,7 +155,7 @@ public class RoleService {
 
         user.setPermissions(permissionList);
         userRepository.save(user);
-        return StandardResponse.<String>builder().status("200").message("Permissions successfully added to "+user.getEmail()).build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Permissions successfully added to "+user.getEmail()).build();
     }
     public StandardResponse<String> assignHospital(HospitalAssignDto hospitalAssignDto){
         UserEntity user = userRepository.findByEmail(hospitalAssignDto.getEmail())
@@ -170,7 +171,7 @@ public class RoleService {
         user.setRoles(roles);
         user.setEmployeeOfHospital(hospitalId);
         userRepository.save(user);
-        return StandardResponse.<String>builder().status("200").message("Hospital assigned successfully").build();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Hospital assigned successfully").build();
     }
     public UUID checkHospitalId(UUID id) {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(id.toString());
@@ -187,7 +188,7 @@ public class RoleService {
     }
     public StandardResponse<DoctorSpecialty> saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
         DoctorSpecialty specialty = modelMapper.map(doctorSpecialtyDto, DoctorSpecialty.class);
-        return StandardResponse.<DoctorSpecialty>builder().status("200")
+        return StandardResponse.<DoctorSpecialty>builder().status(Status.SUCCESS)
                 .message("Doctor specialty created successfully")
                 .data(doctorSpecialtyRepository.save(specialty))
                 .build();
