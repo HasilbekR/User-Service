@@ -73,7 +73,7 @@ public class UserController {
     public StandardResponse<UserDetailsForFront> getMe(
             @RequestParam Principal principal
     ){
-        return userService.getMeByToken(principal);
+        return userService.getMeByToken(principal.getName());
     }
 
     @GetMapping("/get-all-doctors-from-hospital")
