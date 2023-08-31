@@ -222,8 +222,8 @@ public class UserService {
         JwtResponse jwtResponse = JwtResponse.builder().accessToken(accessToken).build();
         return StandardResponse.<JwtResponse>builder().status(Status.SUCCESS).message("Access token successfully sent").data(jwtResponse).build();
     }
-    public String sendId(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found")).getId().toString();
+    public UUID sendId(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found")).getId();
     }
     public StandardResponse<UserDetailsForFront> getMeByToken(String email) {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
@@ -232,4 +232,5 @@ public class UserService {
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();
     }
+
 }

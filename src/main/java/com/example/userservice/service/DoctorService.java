@@ -1,11 +1,13 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
-import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
-import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
+import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
+import com.example.userservice.domain.dto.request.doctor.WorkingDays;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.dto.response.Status;
-import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
@@ -19,11 +21,11 @@ import com.example.userservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -31,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +50,8 @@ public class DoctorService {
     private final DoctorSpecialtyRepository doctorSpecialtyRepository;
 
     private final RestTemplate restTemplate;
-    @Value("${services.create-time-slots}")
-    private String createTimeSlots;
+    @Value("${services.get-working-days}")
+    private String getWorkingDays;
 
 
     public StandardResponse<UserEntity> saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult, Principal principal){
@@ -139,24 +142,38 @@ public class DoctorService {
             }
         }
     }
-
-    public StandardResponse<String> setAvailability(DoctorAvailability doctorAvailability, Principal principal, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new RequestValidationException(bindingResult.getAllErrors());
-        }
-        UserEntity doctorEntity = userRepository.findByEmail(principal.getName()).
-                orElseThrow(() -> new DataNotFoundException("Doctor not found"));
-        if (!doctorEntity.getId().equals(doctorAvailability.getDoctorId())) {
-            throw new AccessDeniedException("Access denied");
-        }
+    public List<WorkingDays> getWorkingDaysOfDoctor(UUID doctorId){
+        ExchangeDataDto exchangeDataDto = new ExchangeDataDto(doctorId.toString());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<DoctorAvailability> entity = new HttpEntity<>(doctorAvailability, httpHeaders);
-        restTemplate.exchange(
-                URI.create(createTimeSlots),
+        HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeDataDto, httpHeaders);
+        ParameterizedTypeReference<List<LocalDate>> responseType = new ParameterizedTypeReference<>() {};
+        List<LocalDate> dates = restTemplate.exchange(
+                URI.create(getWorkingDays),
                 HttpMethod.POST,
                 entity,
-                String.class);
-        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Time slots created for doctor "+doctorEntity.getFullName()+" for "+doctorAvailability.getDay()).build();
+                responseType).getBody();
+
+        List<WorkingDays> workingDays = new ArrayList<>();
+        assert dates != null;
+        for (LocalDate date : dates) {
+            workingDays.add(WorkingDays.builder().weekDay(date.getDayOfWeek().toString()).date(date).build());
+        }
+        return workingDays;
+    }
+
+    public StandardResponse<DoctorResponseForFront> getDoctorForFront(UUID doctorId) {
+        UserEntity doctor = userRepository.getDoctorById(doctorId).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
+        return StandardResponse.<DoctorResponseForFront>builder()
+                .status(Status.SUCCESS)
+                .message("Doctor info")
+                .data(DoctorResponseForFront.builder()
+                        .id(doctorId)
+                        .fullName(doctor.getFullName())
+                        .specialty(doctor.getDoctorInfo().getDoctorSpecialty().getName())
+                        .info(doctor.getDoctorInfo().getInfo())
+                        .workingDays(getWorkingDaysOfDoctor(doctorId))
+                        .build())
+                .build();
     }
 }

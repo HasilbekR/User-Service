@@ -1,4 +1,4 @@
-package com.example.userservice.domain.dto.request.user;
+package com.example.userservice.domain.dto.request.doctor;
 
 import lombok.Builder;
 import lombok.Data;

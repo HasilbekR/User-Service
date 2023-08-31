@@ -1,6 +1,6 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.domain.dto.request.role.DoctorSpecialtyDto;
+import com.example.userservice.domain.dto.request.doctor.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;

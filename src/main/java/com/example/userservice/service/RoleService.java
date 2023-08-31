@@ -1,6 +1,6 @@
 package com.example.userservice.service;
 
-import com.example.userservice.domain.dto.request.role.DoctorSpecialtyDto;
+import com.example.userservice.domain.dto.request.doctor.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
@@ -179,12 +179,12 @@ public class RoleService {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.set("Authorization", "Bearer " + jwtService.generateAccessTokenForService("HOSPITAL-SERVICE"));
         HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeDataDto, httpHeaders);
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<UUID> response = restTemplate.exchange(
                 URI.create(getHospitalId),
                 HttpMethod.POST,
                 entity,
-                String.class);
-        return UUID.fromString(Objects.requireNonNull(response.getBody()));
+                UUID.class);
+        return Objects.requireNonNull(response.getBody());
     }
     public StandardResponse<DoctorSpecialty> saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
         DoctorSpecialty specialty = modelMapper.map(doctorSpecialtyDto, DoctorSpecialty.class);

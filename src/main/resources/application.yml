@@ -20,7 +20,7 @@ spring:
 
 services:
   notification-url: http://NOTIFICATION-SERVICE/notification
-  create-time-slots: http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/create-time-slots
+  get-working-days: http://HYBRID-BOOKING-SERVICE/hybrid-booking/send-working-days-of-doctor
   get-hospital : http://HOSPITAL-SERVICE/hospital/send-id
 
 

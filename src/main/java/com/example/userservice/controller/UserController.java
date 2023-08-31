@@ -2,12 +2,12 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
-import com.example.userservice.domain.dto.request.user.DoctorDetailsForFront;
-import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
 import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
-import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.DoctorService;
@@ -56,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping("/send-id")
-    public String exchangeId(
+    public UUID exchangeId(
             @RequestBody ExchangeDataDto exchangeDataDto
     ) {
         return userService.sendId(exchangeDataDto.getSource());
@@ -109,13 +109,11 @@ public class UserController {
         return doctorService.deleteDoctorFromHospital(email);
     }
 
-    @PostMapping("/set-doctor-availability")
-    @PreAuthorize(value = "hasRole('DOCTOR')")
-    public StandardResponse<String>  setAvailability(
-            @Valid @RequestBody DoctorAvailability doctorAvailability,
-            Principal principal,
-            BindingResult bindingResult
+    @GetMapping("/get-doctor-by-id")
+    public StandardResponse<DoctorResponseForFront> getDoctorById(
+            @RequestParam UUID doctorId
     ){
-        return doctorService.setAvailability(doctorAvailability,principal,bindingResult);
+        return doctorService.getDoctorForFront(doctorId);
     }
+
 }

@@ -4,12 +4,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.mockito.Mockito.*;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
-import com.example.userservice.domain.dto.request.ExchangeDataDto;
-import com.example.userservice.domain.dto.request.user.DoctorsWithSpecialtiesForFront;
-import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
+import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
-import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.DoctorService;
@@ -123,22 +120,6 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    public void testSetDoctorAvailability() throws Exception {
-        DoctorAvailability doctorAvailability = new DoctorAvailability();
-        StandardResponse<String> mockResponse = StandardResponse.<String>builder().build();
-
-
-        when(doctorService.setAvailability(any(DoctorAvailability.class), any(Principal.class), any(BindingResult.class)))
-                .thenReturn(mockResponse);
-
-        mockMvc.perform(post("/user/set-doctor-availability")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(doctorAvailability)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Availability set successfully"));
-    }
 
     private String asJsonString(Object obj) {
         try {

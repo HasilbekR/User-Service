@@ -1,4 +1,4 @@
-package com.example.userservice.domain.dto.request.role;
+package com.example.userservice.domain.dto.request.doctor;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
