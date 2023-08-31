@@ -71,7 +71,7 @@ public class UserController {
 
     @GetMapping("/get-me")
     public StandardResponse<UserDetailsForFront> getMe(
-            @RequestParam Principal principal
+            Principal principal
     ){
         return userService.getMeByToken(principal.getName());
     }
