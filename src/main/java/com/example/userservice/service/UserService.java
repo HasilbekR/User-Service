@@ -202,7 +202,8 @@ public class UserService {
 
     public String generateVerificationCode() {
         Random random = new Random(System.currentTimeMillis());
-        return String.valueOf(random.nextInt(1000000));
+        int code = random.nextInt(1000000);
+        return String.format("%06d", code);
     }
 
     public void checkUserEmailAndPhoneNumber(String email, String phoneNumber) {
