@@ -48,6 +48,7 @@ public class DoctorService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final DoctorSpecialtyRepository doctorSpecialtyRepository;
+    private final JwtService jwtService;
 
     private final RestTemplate restTemplate;
     @Value("${services.get-working-days}")
@@ -146,6 +147,7 @@ public class DoctorService {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(doctorId.toString());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set("Authorization", "Bearer " + jwtService.generateAccessTokenForService("HYBRID-BOOKING-SERVICE"));
         HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeDataDto, httpHeaders);
         ParameterizedTypeReference<List<LocalDate>> responseType = new ParameterizedTypeReference<>() {};
         List<LocalDate> dates = restTemplate.exchange(
