@@ -8,6 +8,7 @@ import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesF
 import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
 import com.example.userservice.domain.dto.request.user.UserRequestDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
+import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.service.DoctorService;
@@ -114,6 +115,10 @@ public class UserController {
             @RequestParam UUID doctorId
     ){
         return doctorService.getDoctorForFront(doctorId);
+    }
+    @GetMapping("/get-all-specialties")
+    public StandardResponse<List<DoctorSpecialty>> getAllSpecialties(){
+        return doctorService.getAllSpecialties();
     }
 
 }

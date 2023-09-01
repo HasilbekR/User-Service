@@ -116,6 +116,10 @@ public class DoctorService {
     public List<String> getDoctorSpecialtiesFromHospital(UUID hospitalId){
         return userRepository.getAllSpecialtiesFromHospital(hospitalId);
     }
+    public StandardResponse<List<DoctorSpecialty>> getAllSpecialties(){
+        return StandardResponse.<List<DoctorSpecialty>>builder().status(Status.SUCCESS)
+                .message("All specialties").data(doctorSpecialtyRepository.findAll()).build();
+    }
     public StandardResponse<List<DoctorDetailsForFront>> getDoctorsBySpecialty(UUID hospitalId, String specialty){
         List<UserEntity> doctors = userRepository.getAllDoctorsBySpecialty(hospitalId, specialty);
         return StandardResponse.<List<DoctorDetailsForFront>>builder().status(Status.SUCCESS)
