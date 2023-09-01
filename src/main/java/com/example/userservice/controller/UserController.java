@@ -120,5 +120,11 @@ public class UserController {
     public StandardResponse<List<DoctorSpecialty>> getAllSpecialties(){
         return doctorService.getAllSpecialties();
     }
+    @GetMapping("/get-specialty-by-id")
+    public StandardResponse<DoctorSpecialty> getSpecialty(
+            @RequestParam UUID specialtyId
+    ){
+        return doctorService.getSpecialty(specialtyId);
+    }
 
 }

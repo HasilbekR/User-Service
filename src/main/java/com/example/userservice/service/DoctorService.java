@@ -182,4 +182,8 @@ public class DoctorService {
                         .build())
                 .build();
     }
+
+    public StandardResponse<DoctorSpecialty> getSpecialty(UUID specialtyId) {
+        return StandardResponse.<DoctorSpecialty>builder().status(Status.SUCCESS).message("Specialty info").data(doctorSpecialtyRepository.findById(specialtyId).orElseThrow()).build();
+    }
 }
