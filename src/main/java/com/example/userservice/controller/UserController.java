@@ -2,6 +2,7 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking;
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
@@ -62,11 +63,11 @@ public class UserController {
     ) {
         return userService.sendId(exchangeDataDto.getSource());
     }
-    @PostMapping("/send-fullName")
-    public String exchangeFullName(
+    @PostMapping("/send-doctor")
+    public DoctorDetailsForBooking exchangeFullName(
             @RequestBody ExchangeDataDto exchangeDataDto
     ) {
-        return userService.sendFullName(UUID.fromString(exchangeDataDto.getSource()));
+        return userService.sendDoctor(UUID.fromString(exchangeDataDto.getSource()));
     }
 
     @PostMapping("/send-email")

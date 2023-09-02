@@ -1,5 +1,6 @@
 package com.example.userservice.service;
 
+import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.JwtResponse;
@@ -232,8 +233,11 @@ public class UserService {
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();
     }
-    public String sendFullName(UUID userId){
-        return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getFullName();
+    public DoctorDetailsForBooking sendDoctor(UUID userId){
+        UserEntity doctor = userRepository.getDoctorById(userId).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
+        DoctorDetailsForBooking doctorDetails = modelMapper.map(doctor, DoctorDetailsForBooking.class);
+        doctorDetails.setHospitalId(doctor.getEmployeeOfHospital());
+        return doctorDetails;
     }
 
 }
