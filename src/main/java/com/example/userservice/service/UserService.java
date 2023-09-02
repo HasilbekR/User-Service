@@ -235,9 +235,13 @@ public class UserService {
     }
     public DoctorDetailsForBooking sendDoctor(UUID userId){
         UserEntity doctor = userRepository.getDoctorById(userId).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
-        DoctorDetailsForBooking doctorDetails = modelMapper.map(doctor, DoctorDetailsForBooking.class);
-        doctorDetails.setHospitalId(doctor.getEmployeeOfHospital());
-        return doctorDetails;
+        return DoctorDetailsForBooking.builder()
+                .roomNumber(doctor.getDoctorInfo().getRoomNumber())
+                .fullName(doctor.getFullName())
+                .specialty(doctor.getDoctorInfo().getDoctorSpecialty().getName())
+                .hospitalId(doctor.getEmployeeOfHospital())
+                .id(doctor.getId())
+                .build();
     }
 
 }
