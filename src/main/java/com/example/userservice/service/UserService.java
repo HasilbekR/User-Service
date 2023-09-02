@@ -232,5 +232,8 @@ public class UserService {
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();
     }
+    public String sendFullName(UUID userId){
+        return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getFullName();
+    }
 
 }

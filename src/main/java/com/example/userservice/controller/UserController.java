@@ -62,6 +62,12 @@ public class UserController {
     ) {
         return userService.sendId(exchangeDataDto.getSource());
     }
+    @PostMapping("/send-fullName")
+    public String exchangeFullName(
+            @RequestBody ExchangeDataDto exchangeDataDto
+    ) {
+        return userService.sendFullName(UUID.fromString(exchangeDataDto.getSource()));
+    }
 
     @PostMapping("/send-email")
     public String exchangeEmail(
