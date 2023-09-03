@@ -123,6 +123,11 @@ public class UserService {
                 .orElseThrow(() -> new UserBadRequestException("user not found"));
         modelMapper.map(update, userEntity);
         userEntity.setUpdatedDate(LocalDateTime.now());
+        if(update.getDateOfBirth() != null){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate dateOfBirth = LocalDate.parse(update.getDateOfBirth(), formatter);
+            userEntity.setDateOfBirth(dateOfBirth);
+        }
         userRepository.save(userEntity);
 
         return StandardResponse.<UserDetailsForFront>builder().status(Status.SUCCESS)

@@ -11,7 +11,6 @@ public class RequestValidationException extends RuntimeException{
         StringBuilder errorMessage = new StringBuilder();
         for (ObjectError allError : allErrors) {
             errorMessage.append(allError.getDefaultMessage()).append("\n");
-
         }
         this.message = errorMessage.toString();
     }
