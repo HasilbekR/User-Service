@@ -41,6 +41,8 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private List<PermissionEntity> permissions;
     @Enumerated(EnumType.STRING)
     private UserState state;
+    @Enumerated(EnumType.STRING)
+    private UserReservationData userReservationData;
     @OneToOne
     private DoctorInfo doctorInfo;
     private UUID employeeOfHospital;

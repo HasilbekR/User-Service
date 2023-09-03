@@ -160,4 +160,42 @@ public class UserController {
     ){
         return userService.sendVerificationCodeToChangeEmail(email, principal);
     }
+
+    @PostMapping("/getById")
+    public ResponseEntity<UserEntity> getById(
+            @RequestBody ExchangeDataDto exchangeDataDto
+    ) {
+        return ResponseEntity.ok(userService.findById(UUID.fromString(exchangeDataDto.getSource())));
+    }
+
+    @PostMapping("/countActiveDoctorBookingAndQueues")
+    @PreAuthorize(value = "hasRole('DOCTOR') and hasRole('ADMIN')")
+    public ResponseEntity<Long> getActiveBookingAndQueues(
+            @RequestParam UUID doctorId
+    ) {
+        return ResponseEntity.ok(doctorService.countActiveDoctorBookingAndQueues(doctorId));
+    }
+
+    @PostMapping("/countCompleteDoctorBookingAndQueues")
+    @PreAuthorize(value = "hasRole('DOCTOR') and hasRole('ADMIN')")
+    public ResponseEntity<Long> getCompleteDoctorBookingAndQueues(
+            @RequestParam UUID doctorId
+    ) {
+        return ResponseEntity.ok(doctorService.countCompleteDoctorBookingAndQueues(doctorId));
+    }
+//
+//    @PostMapping("/getActiveDoctorBookingAndQueues")
+//    public ResponseEntity<BookingRequestDto> getActiveDoctorBookingAndQueues(
+//            @RequestParam UUID doctorId
+//    ) {
+//        return
+//    }
+//
+//    @PostMapping("/getCompleteDoctorBookingAndQueues")
+//    public ResponseEntity<BookingRequestDto> getCompleteDoctorBookingAndQueues(
+//            @RequestParam UUID doctorId
+//    ) {
+//        return
+//    }
+
 }
