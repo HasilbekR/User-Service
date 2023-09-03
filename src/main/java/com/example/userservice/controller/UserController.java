@@ -11,12 +11,14 @@ import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
 import com.example.userservice.domain.entity.user.UserEntity;
+import com.example.userservice.exception.RequestValidationException;
 import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -43,8 +45,13 @@ public class UserController {
     @PutMapping("/update-user")
     public StandardResponse<UserDetailsForFront> updateUpdateProfile(
             @RequestBody UserUpdateRequest update,
+            BindingResult bindingResult,
             Principal principal
     ) {
+        if (bindingResult.hasErrors()){
+            List<ObjectError> allErrors = bindingResult.getAllErrors();
+            throw new RequestValidationException(allErrors);
+        }
         return userService.updateProfile(update, principal);
     }
 
