@@ -18,6 +18,7 @@ import java.util.UUID;
 public class UserDetailsForFront {
     private UUID id;
     private String fullName;
+    private String email;
     private UserState userState;
     private String phoneNumber;
     private LocalDate dateOfBirth;
