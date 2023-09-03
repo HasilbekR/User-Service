@@ -16,6 +16,7 @@ import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -161,12 +162,12 @@ public class UserController {
         return userService.sendVerificationCodeToChangeEmail(email, principal);
     }
 
-    @PostMapping("/getById")
-    public ResponseEntity<UserEntity> getById(
-            @RequestBody ExchangeDataDto exchangeDataDto
-    ) {
-        return ResponseEntity.ok(userService.findById(UUID.fromString(exchangeDataDto.getSource())));
-    }
+//    @PostMapping("/getById")
+//    public ResponseEntity<UserEntity> getById(
+//            @RequestBody ExchangeDataDto exchangeDataDto
+//    ) {
+//        return ResponseEntity.ok(userService.findById(UUID.fromString(exchangeDataDto.getSource())));
+//    }
 
     @PostMapping("/countActiveDoctorBookingAndQueues")
     @PreAuthorize(value = "hasRole('DOCTOR') and hasRole('ADMIN')")
