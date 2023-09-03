@@ -22,9 +22,10 @@ services:
   notification-url: http://NOTIFICATION-SERVICE/notification
   get-working-days: http://HYBRID-BOOKING-SERVICE/hybrid-booking/send-working-days-of-doctor
   get-hospital : http://HOSPITAL-SERVICE/hospital/send-id
-
-
-
+  count-doctors-queues-by-doctorId-and-queueStatus-active : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/queue/count-queues-by-doctorId-and-bookingStatus-active
+  count-doctors-queues-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/queue/count-bookings-by-doctorId-and-bookingStatus-comlete
+  count-doctors-bookings-by-doctorId-and-queueStatus-active : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/count-bookings-by-doctorId-and-bookingStatus-active
+  count-doctors-bookings-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/count-bookings-by-doctorId-and-bookingStatus-complete
 eureka:
   client:
     service-url:
