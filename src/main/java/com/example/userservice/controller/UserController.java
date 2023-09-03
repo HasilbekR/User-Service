@@ -141,9 +141,10 @@ public class UserController {
     }
     @PostMapping("/verify-code-for-changing-email")
     public StandardResponse<String> verifyCodeForChangingEmail(
-            @RequestBody VerifyCodeDto verifyCodeDto
+            @RequestBody VerifyCodeDto verifyCodeDto,
+            Principal principal
     ) {
-        return userService.verifyCodeForChangingEmail(verifyCodeDto);
+        return userService.verifyCodeForChangingEmail(verifyCodeDto, principal);
     }
     @PostMapping("/check-password")
     public StandardResponse<Boolean> checkPassword(

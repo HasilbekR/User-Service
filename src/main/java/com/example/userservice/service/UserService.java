@@ -205,10 +205,12 @@ public class UserService {
         checkVerificationCode(verifyCodeDto);
         return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully verified").build();
     }
-    public StandardResponse<String> verifyCodeForChangingEmail(VerifyCodeDto verifyCodeDto) {
+    public StandardResponse<String> verifyCodeForChangingEmail(VerifyCodeDto verifyCodeDto, Principal principal) {
+        String newEmail = verifyCodeDto.getEmail();
+        verifyCodeDto.setEmail(principal.getName());
         checkVerificationCode(verifyCodeDto);
         UserEntity userEntity = userRepository.findByEmail(verifyCodeDto.getEmail()).orElseThrow(() -> new DataNotFoundException("User not found"));
-        userEntity.setEmail(verifyCodeDto.getEmail());
+        userEntity.setEmail(newEmail);
         userRepository.save(userEntity);
         return StandardResponse.<String>builder().status(Status.SUCCESS).message("Email successfully changed").build();
     }
