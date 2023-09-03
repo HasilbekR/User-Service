@@ -14,6 +14,7 @@ import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.domain.entity.user.UserState;
 import com.example.userservice.exception.AuthenticationFailedException;
 import com.example.userservice.exception.DataNotFoundException;
+import com.example.userservice.exception.UniqueObjectException;
 import com.example.userservice.exception.UserBadRequestException;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
@@ -117,15 +118,16 @@ public class UserService {
         }
     }
 
-    public StandardResponse<UserEntity> updateProfile(UUID userId, UserRequestDto update) {
-        UserEntity userEntity = userRepository.findById(userId)
+    public StandardResponse<UserDetailsForFront> updateProfile(UserUpdateRequest update, Principal principal) {
+        UserEntity userEntity = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UserBadRequestException("user not found"));
         modelMapper.map(update, userEntity);
         userEntity.setUpdatedDate(LocalDateTime.now());
+        userRepository.save(userEntity);
 
-        return StandardResponse.<UserEntity>builder().status(Status.SUCCESS)
+        return StandardResponse.<UserDetailsForFront>builder().status(Status.SUCCESS)
                 .message("User updated successfully")
-                .data(userRepository.save(userEntity))
+                .data(mappingUser(userEntity))
                 .build();
     }
 
@@ -144,6 +146,18 @@ public class UserService {
                 .build();
         verificationRepository.save(verificationEntity);
         mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode());
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
+    }
+    public StandardResponse<String> sendVerificationCodeToChangeEmail(String email, Principal principal){
+        UserEntity user = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
+        Optional<UserEntity> userEntity = userRepository.findByEmail(email);
+        if(userEntity.isPresent()) throw new UniqueObjectException("Email already exists");
+        VerificationEntity verificationEntity = VerificationEntity.builder()
+                .userId(user)
+                .code(generateVerificationCode())
+                .build();
+        verificationRepository.save(verificationEntity);
+        mailService.sendVerificationCode(email, verificationEntity.getCode());
         return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
     }
 
@@ -178,12 +192,24 @@ public class UserService {
     }
 
     public StandardResponse<String> verifyPasswordForUpdatePassword(VerifyCodeDto verifyCodeDto) {
+        checkVerificationCode(verifyCodeDto);
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully verified").build();
+    }
+    public StandardResponse<String> verifyCodeForChangingEmail(VerifyCodeDto verifyCodeDto) {
+        checkVerificationCode(verifyCodeDto);
+        UserEntity userEntity = userRepository.findByEmail(verifyCodeDto.getEmail()).orElseThrow(() -> new DataNotFoundException("User not found"));
+        userEntity.setEmail(verifyCodeDto.getEmail());
+        userRepository.save(userEntity);
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Email successfully changed").build();
+    }
+
+    public void checkVerificationCode(VerifyCodeDto verifyCodeDto) {
         VerificationEntity entity = verificationRepository.findByUserEmail(verifyCodeDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("Verification code doesn't exists or expired"));
-
         if (verifyCodeDto.getCode().equals(entity.getCode())) {
             if (entity.getCreatedDate().plusMinutes(10).isAfter(LocalDateTime.now())) {
-                return StandardResponse.<String>builder().status(Status.SUCCESS).message("Successfully verified").build();
+                verificationRepository.delete(entity);
+                return;
             }
             verificationRepository.delete(entity);
             throw new UserBadRequestException("Verification Code has Expired!");
@@ -244,4 +270,9 @@ public class UserService {
                 .build();
     }
 
+    public StandardResponse<Boolean> checkPassword(CheckPasswordDto checkPasswordDto, Principal principal) {
+        UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
+        boolean matches = passwordEncoder.matches(checkPasswordDto.getPassword(), userEntity.getPassword());
+        return StandardResponse.<Boolean>builder().status(Status.SUCCESS).message("Password matches").data(matches).build();
+    }
 }

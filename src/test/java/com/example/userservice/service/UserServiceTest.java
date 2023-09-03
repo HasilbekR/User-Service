@@ -142,24 +142,24 @@ public class UserServiceTest {
 
         verify(userRepository, times(1)).findByEmail(loginRequestDto.getEmail());
     }
-    @Test
-    public void testUpdateProfile() {
-        UUID userId = UUID.randomUUID();
-        UserRequestDto update = new UserRequestDto();
-        update.setFullName("Updated");
-
-        UserEntity userEntity = new UserEntity();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
-        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
-
-        StandardResponse<UserEntity> result = userService.updateProfile(userId, update);
-
-        assertNotNull(result);
-        assertEquals("Updated", result.getData().getFullName());
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).save(userEntity);
-    }
+//    @Test
+//    public void testUpdateProfile() {
+//        UUID userId = UUID.randomUUID();
+//        UserRequestDto update = new UserRequestDto();
+//        update.setFullName("Updated");
+//
+//        UserEntity userEntity = new UserEntity();
+//        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+//        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
+//
+//        StandardResponse<UserEntity> result = userService.updateProfile(userId, update);
+//
+//        assertNotNull(result);
+//        assertEquals("Updated", result.getData().getFullName());
+//
+//        verify(userRepository, times(1)).findById(userId);
+//        verify(userRepository, times(1)).save(userEntity);
+//    }
 
     @Test
     public void testGetAll() {

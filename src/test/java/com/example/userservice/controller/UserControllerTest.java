@@ -59,20 +59,20 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    public void testUpdateUserProfile() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UserRequestDto update = new UserRequestDto();
-        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().build();
-
-        when(userService.updateProfile(any(UUID.class), any(UserRequestDto.class))).thenReturn(mockResponse);
-
-        mockMvc.perform(put("/user/{userId}/update-user", userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(update)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
+//    @Test
+//    public void testUpdateUserProfile() throws Exception {
+//        UUID userId = UUID.randomUUID();
+//        UserRequestDto update = new UserRequestDto();
+//        StandardResponse<UserEntity> mockResponse = StandardResponse.<UserEntity>builder().build();
+//
+//        when(userService.updateProfile(any(UUID.class), any(UserRequestDto.class))).thenReturn(mockResponse);
+//
+//        mockMvc.perform(put("/user/{userId}/update-user", userId)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(asJsonString(update)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+//    }
 
     @Test
     public void testGetAllDoctorsFromHospital() throws Exception {

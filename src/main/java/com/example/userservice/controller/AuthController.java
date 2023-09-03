@@ -51,6 +51,14 @@ public class AuthController {
     ){
         return userService.sendVerificationCode(principal.getName());
     }
+    @GetMapping("/verification-for-changing-email")
+    public StandardResponse<String> sendVerificationToChangeEmail(
+            @RequestParam String email,
+            Principal principal
+    ){
+        return userService.sendVerificationCodeToChangeEmail(email, principal);
+    }
+
     @GetMapping("/access-token")
     public StandardResponse<JwtResponse> getAccessToken(
             Principal principal
@@ -84,4 +92,5 @@ public class AuthController {
     ) {
         return userService.updatePassword(updatePasswordDto);
     }
+
 }

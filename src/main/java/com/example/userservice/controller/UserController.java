@@ -6,8 +6,7 @@ import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
-import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
-import com.example.userservice.domain.dto.request.user.UserRequestDto;
+import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
@@ -41,12 +40,12 @@ public class UserController {
         return doctorService.saveDoctor(drCreateDto,bindingResult,principal);
     }
 
-    @PutMapping("/{userId}/update-user")
-    public StandardResponse<UserEntity> updateUpdateProfile(
-            @PathVariable UUID userId,
-            @RequestBody UserRequestDto update
+    @PutMapping("/update-user")
+    public StandardResponse<UserDetailsForFront> updateUpdateProfile(
+            @RequestBody UserUpdateRequest update,
+            Principal principal
     ) {
-        return userService.updateProfile(userId, update);
+        return userService.updateProfile(update, principal);
     }
 
     @GetMapping("/get-all-user")
@@ -133,5 +132,17 @@ public class UserController {
     ){
         return doctorService.getSpecialty(specialtyId);
     }
-
+    @PostMapping("/send-verify-code-for-changing-email")
+    public StandardResponse<String> verifyCodeForChangingEmail(
+            @RequestBody VerifyCodeDto verifyCodeDto
+    ) {
+        return userService.verifyCodeForChangingEmail(verifyCodeDto);
+    }
+    @PostMapping("/check-password")
+    public StandardResponse<Boolean> checkPassword(
+            @RequestBody CheckPasswordDto checkPasswordDto,
+            Principal principal
+    ){
+        return userService.checkPassword(checkPasswordDto, principal);
+    }
 }
