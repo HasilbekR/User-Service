@@ -44,7 +44,7 @@ public class UserController {
 
     @PutMapping("/update-user")
     public StandardResponse<UserDetailsForFront> updateUpdateProfile(
-            @RequestBody UserUpdateRequest update,
+            @Valid @RequestBody UserUpdateRequest update,
             BindingResult bindingResult,
             Principal principal
     )throws RequestValidationException {
