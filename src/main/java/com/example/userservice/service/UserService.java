@@ -283,6 +283,7 @@ public class UserService {
     public StandardResponse<Boolean> checkPassword(CheckPasswordDto checkPasswordDto, Principal principal) {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
         boolean matches = passwordEncoder.matches(checkPasswordDto.getPassword(), userEntity.getPassword());
-        return StandardResponse.<Boolean>builder().status(Status.SUCCESS).message("Password matches").data(matches).build();
+        if(!matches) throw new UserBadRequestException("Password not matches");
+        return StandardResponse.<Boolean>builder().status(Status.SUCCESS).message("Password matches").data(true).build();
     }
 }
