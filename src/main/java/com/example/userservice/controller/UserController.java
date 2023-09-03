@@ -139,7 +139,7 @@ public class UserController {
     ){
         return doctorService.getSpecialty(specialtyId);
     }
-    @PostMapping("/send-verify-code-for-changing-email")
+    @PostMapping("/verify-code-for-changing-email")
     public StandardResponse<String> verifyCodeForChangingEmail(
             @RequestBody VerifyCodeDto verifyCodeDto
     ) {
@@ -151,5 +151,12 @@ public class UserController {
             Principal principal
     ){
         return userService.checkPassword(checkPasswordDto, principal);
+    }
+    @GetMapping("/send-verification-for-changing-email")
+    public StandardResponse<String> sendVerificationToChangeEmail(
+            @RequestParam String email,
+            Principal principal
+    ){
+        return userService.sendVerificationCodeToChangeEmail(email, principal);
     }
 }
