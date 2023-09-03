@@ -47,7 +47,7 @@ public class UserController {
             @RequestBody UserUpdateRequest update,
             BindingResult bindingResult,
             Principal principal
-    ) {
+    )throws RequestValidationException {
         if (bindingResult.hasErrors()){
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             throw new RequestValidationException(allErrors);
