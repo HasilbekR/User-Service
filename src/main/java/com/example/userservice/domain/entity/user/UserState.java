@@ -4,4 +4,5 @@ public enum UserState {
     ACTIVE,
     UNVERIFIED,
     BLOCKED
+
 }

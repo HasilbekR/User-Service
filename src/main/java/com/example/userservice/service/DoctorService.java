@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
+import com.example.userservice.domain.dto.request.ExchangeDataDto;
 import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.entity.doctor.DoctorInfo;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
@@ -32,6 +33,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -46,6 +48,15 @@ public class DoctorService {
     private final RestTemplate restTemplate;
     @Value("${services.create-time-slots}")
     private String createTimeSlots;
+    @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-active}")
+    private String countDoctorQueuesByDoctorIdAndQueueStatusActive;
+    @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-complete}")
+    private String countDoctorQueuesByDoctorIdAndQueueStatusComplete;
+    @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-active}")
+    private String countDoctorBookingsByDoctorIdAndQueueStatusActive;
+    @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-complete}")
+    private String countDoctorBookingsByDoctorIdAndQueueStatusComplete;
+
 
 
     public UserEntity saveDoctor(DoctorCreateDto drCreateDto, BindingResult bindingResult,Principal principal){
@@ -130,5 +141,46 @@ public class DoctorService {
                 entity,
                 String.class);
         return response;
+    }
+
+    public Long countActiveDoctorBookingAndQueues(UUID doctorId) {
+        ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeData, httpHeaders);
+        ResponseEntity<Long> queueResponse = restTemplate.exchange(
+                URI.create(countDoctorQueuesByDoctorIdAndQueueStatusActive),
+                HttpMethod.POST,
+                entity,
+                Long.class);
+        ResponseEntity<Long> bookingResponse = restTemplate.exchange(
+                URI.create(countDoctorBookingsByDoctorIdAndQueueStatusActive),
+                HttpMethod.POST,
+                entity,
+                Long.class);
+        System.out.println(Objects.requireNonNull(queueResponse.getBody()));
+        System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
+        return queueResponse.getBody() + bookingResponse.getBody();
+    }
+
+
+    public Long countCompleteDoctorBookingAndQueues(UUID doctorId) {
+        ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeData, httpHeaders);
+        ResponseEntity<Long> queueResponse = restTemplate.exchange(
+                URI.create(countDoctorQueuesByDoctorIdAndQueueStatusComplete),
+                HttpMethod.POST,
+                entity,
+                Long.class);
+        ResponseEntity<Long> bookingResponse = restTemplate.exchange(
+                URI.create(countDoctorBookingsByDoctorIdAndQueueStatusComplete),
+                HttpMethod.POST,
+                entity,
+                Long.class);
+        System.out.println(Objects.requireNonNull(queueResponse.getBody()));
+        System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
+        return queueResponse.getBody() + bookingResponse.getBody();
     }
 }

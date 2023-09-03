@@ -1,6 +1,5 @@
 package com.example.userservice.domain.dto.request.user;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -19,7 +18,7 @@ public class UserRequestDto {
     private String email;
     @NotBlank(message = "email must not be blank")
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
-            message = "Password must contain at least one uppercase letter(A-Z),at least one lowercase letter(a-z),at least one digit (0-9) and length at least 8 characters")
+            message = "Passwor d must contain at least one uppercase letter(A-Z),at least one lowercase letter(a-z),at least one digit (0-9) and length at least 8 characters")
     private String password;
     @NotBlank(message = "dateOfBirth must not be blank")
     @Pattern(regexp = "^(0[1-9]|[1-2][0-9]|3[0-1])\\.(0[1-9]|1[0-2])\\.\\d{4}$", message = "Invalid date format. Use dd.mm.yyyy.")
