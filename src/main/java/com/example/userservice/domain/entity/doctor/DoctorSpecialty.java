@@ -1,25 +1,17 @@
 package com.example.userservice.domain.entity.doctor;
 
-public enum DoctorSpecialty {
-    GENERAL_MEDICINE,
-    SURGERY,
-    PEDIATRICS,
-    OBSTETRICS_AND_GYNECOLOGY,
-    ORTHOPEDICS,
-    CARDIOLOGY,
-    NEUROLOGY,
-    ONCOLOGY,
-    OPHTHALMOLOGY,
-    DERMATOLOGY,
-    GASTROENTEROLOGY,
-    UROLOGY,
-    PSYCHIATRY,
-    ANESTHESIOLOGY,
-    RADIOLOGY,
-    EMERGENCY_MEDICINE,
-    PATHOLOGY,
-    NEPHROLOGY,
-    PULMONOLOGY,
-    ENDOCRINOLOGY
+import com.example.userservice.domain.entity.BaseEntity;
+import jakarta.persistence.Entity;
+import lombok.*;
 
+@Entity(name = "doctor_specialty")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
+public class DoctorSpecialty extends BaseEntity {
+    private String name;
+    private String description;
+    private String diseaseTreatment;
 }

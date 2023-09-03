@@ -1,17 +1,25 @@
 package com.example.userservice.service;
 
+import com.example.userservice.domain.dto.request.doctor.DoctorSpecialtyDto;
 import com.example.userservice.domain.dto.request.role.HospitalAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleAssignDto;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
+import com.example.userservice.domain.dto.response.StandardResponse;
+import com.example.userservice.domain.dto.response.Status;
+import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.role.PermissionEntity;
 import com.example.userservice.domain.entity.role.RoleEntity;
 import com.example.userservice.domain.entity.user.UserEntity;
 import com.example.userservice.exception.DataNotFoundException;
+import com.example.userservice.exception.UniqueObjectException;
+import com.example.userservice.exception.UserBadRequestException;
+import com.example.userservice.repository.DoctorSpecialtyRepository;
 import com.example.userservice.repository.PermissionRepository;
 import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,33 +42,15 @@ public class RoleService {
     private final PermissionRepository permissionRepository;
     private final RestTemplate restTemplate;
     private final JwtService jwtService;
+    private final ModelMapper modelMapper;
+    private final DoctorSpecialtyRepository doctorSpecialtyRepository;
     @Value("${services.get-hospital}")
     private String getHospitalId;
 
-    public RoleEntity save(RoleDto roleDto) {
+    public StandardResponse<RoleEntity> save(RoleDto roleDto) {
         RoleEntity roleEntityByName = roleRepository.findRoleEntitiesByName(roleDto.getName());
-        List<String> roleDtoPermissions = roleDto.getPermissions();
         // If role already exists
-        if (roleEntityByName != null) {
-            List<PermissionEntity> rolePermissions = roleEntityByName.getPermissions();
-            // Checking if dto has another permission which role doesn't have
-            for (String roleDtoPermission : roleDtoPermissions) {
-                if (rolePermissions.stream().noneMatch(permission -> permission.getPermission().equals(roleDtoPermission))) {
-                    // Checking if database has this extra permission
-                    PermissionEntity permissionEntitiesByPermission = permissionRepository.findPermissionEntitiesByPermission(roleDtoPermission);
-                    if (permissionEntitiesByPermission != null) {
-                        rolePermissions.add(permissionEntitiesByPermission);
-                    }
-                    // If it doesn't have we create a new permission
-                    else{
-                        permissionEntitiesByPermission = PermissionEntity.builder().permission(roleDtoPermission).build();
-                        rolePermissions.add(permissionRepository.save(permissionEntitiesByPermission));
-                    }
-                }
-            }
-            roleEntityByName.setPermissions(rolePermissions);
-            return roleRepository.save(roleEntityByName);
-        }
+        if (roleEntityByName != null) throw new UniqueObjectException("Role already exists");
         // If role doesn't exists in db
         List<String> permissions = roleDto.getPermissions();
         List<PermissionEntity> rolePermission = new ArrayList<>();
@@ -76,14 +66,16 @@ public class RoleService {
             }
         }
         RoleEntity roleEntity = RoleEntity.builder().name(roleDto.getName()).permissions(rolePermission).build();
-        return roleRepository.save(roleEntity);
+        roleEntity = roleRepository.save(roleEntity);
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS).message("Role successfully created").data(roleEntity).build();
     }
 
-    public RoleEntity getRole(String name) {
-        return roleRepository.findRoleEntityByName(name).orElseThrow(() -> new DataNotFoundException("Role not found"));
+    public StandardResponse<RoleEntity> getRole(String name) {
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(name).orElseThrow(() -> new DataNotFoundException("Role not found"));
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS).message("Role successfully sent").data(roleEntity).build();
     }
 
-    public RoleEntity update(RoleDto roleDto) {
+    public StandardResponse<RoleEntity> update(RoleDto roleDto) {
         RoleEntity roleEntityByName = roleRepository.findRoleEntityByName(roleDto.getName()).orElseThrow(() -> new DataNotFoundException("Role not found"));
 
         if(roleDto.getPermissions() != null) {
@@ -100,10 +92,13 @@ public class RoleService {
             roleEntityByName.setPermissions(updatedPermissions);
         }
         roleEntityByName.setUpdatedDate(LocalDateTime.now());
-        return roleRepository.save(roleEntityByName);
+        return StandardResponse.<RoleEntity>builder().status(Status.SUCCESS)
+                .message("Permissions successfully added to the role")
+                .data(roleRepository.save(roleEntityByName))
+                .build();
     }
 
-    public String assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
+    public StandardResponse<String> assignRoleToUser(RoleAssignDto roleAssignDto, Principal principal) {
         if(Objects.equals(roleAssignDto.getName(), "OWNER")) throw new AccessDeniedException("Unacceptable role name");
         RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
@@ -114,22 +109,69 @@ public class RoleService {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow();
 
         List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(roleEntity)) throw new UserBadRequestException("User already has "+role.getName()+" role");
+        }
+        List<String> permissions = roleAssignDto.getPermissions();
+        List<PermissionEntity> permissionList = new ArrayList<>();
+        for (String permission : permissions) {
+            for (PermissionEntity roleEntityPermission : roleEntity.getPermissions()) {
+                if(permission.equals(roleEntityPermission.getPermission())){
+                    permissionList.add(roleEntityPermission);
+                }
+            }
+        }
         roles.add(roleEntity);
-
         user.setRoles(roles);
+        user.setPermissions(permissionList);
         user.setEmployeeOfHospital(userEntity.getEmployeeOfHospital());
         userRepository.save(user);
-        return user.getEmail();
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Role successfully assigned to " + user.getEmail()).build();
     }
-    public void assignHospital(HospitalAssignDto hospitalAssignDto){
+
+    public StandardResponse<String> addPermissionsToUser(RoleAssignDto roleAssignDto) {
+        RoleEntity roleEntity = roleRepository.findRoleEntityByName(roleAssignDto.getName())
+                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
+        UserEntity user = userRepository.findByEmail(roleAssignDto.getEmail())
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        List<PermissionEntity> permissionList = user.getPermissions();
+
+        List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(roleEntity)){
+                List<String> permissions = roleAssignDto.getPermissions();
+                for (String permission : permissions) {
+                    for (PermissionEntity roleEntityPermission : roleEntity.getPermissions()) {
+                        if(permission.equals(roleEntityPermission.getPermission())){
+                            permissionList.add(roleEntityPermission);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+        user.setPermissions(permissionList);
+        userRepository.save(user);
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Permissions successfully added to "+user.getEmail()).build();
+    }
+    public StandardResponse<String> assignHospital(HospitalAssignDto hospitalAssignDto){
         UserEntity user = userRepository.findByEmail(hospitalAssignDto.getEmail())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
         UUID hospitalId = checkHospitalId(hospitalAssignDto.getHospitalId());
+        if(hospitalId == null) throw new DataNotFoundException("Hospital not found");
         RoleEntity superAdmin = roleRepository.findRoleEntityByName("SUPER_ADMIN").orElseThrow();
         List<RoleEntity> roles = user.getRoles();
+        for (RoleEntity role : roles) {
+            if(role.equals(superAdmin)) throw new UserBadRequestException("User already has super_admin role");
+        }
         roles.add(superAdmin);
         user.setRoles(roles);
         user.setEmployeeOfHospital(hospitalId);
+        userRepository.save(user);
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Hospital assigned successfully").build();
     }
     public UUID checkHospitalId(UUID id) {
         ExchangeDataDto exchangeDataDto = new ExchangeDataDto(id.toString());
@@ -137,12 +179,19 @@ public class RoleService {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.set("Authorization", "Bearer " + jwtService.generateAccessTokenForService("HOSPITAL-SERVICE"));
         HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeDataDto, httpHeaders);
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<UUID> response = restTemplate.exchange(
                 URI.create(getHospitalId),
                 HttpMethod.POST,
                 entity,
-                String.class);
-        return UUID.fromString(Objects.requireNonNull(response.getBody()));
+                UUID.class);
+        return Objects.requireNonNull(response.getBody());
+    }
+    public StandardResponse<DoctorSpecialty> saveDoctorSpecialty(DoctorSpecialtyDto doctorSpecialtyDto){
+        DoctorSpecialty specialty = modelMapper.map(doctorSpecialtyDto, DoctorSpecialty.class);
+        return StandardResponse.<DoctorSpecialty>builder().status(Status.SUCCESS)
+                .message("Doctor specialty created successfully")
+                .data(doctorSpecialtyRepository.save(specialty))
+                .build();
     }
 
 
