@@ -128,6 +128,11 @@ public class UserService {
             LocalDate dateOfBirth = LocalDate.parse(update.getDateOfBirth(), formatter);
             userEntity.setDateOfBirth(dateOfBirth);
         }
+        if(update.getGender() != null){
+            if(!(Objects.equals(update.getGender(), "MALE") || Objects.equals(update.getGender(), "FEMALE"))){
+                throw new DataNotFoundException("Gender not found");
+            }
+        }
         userRepository.save(userEntity);
 
         return StandardResponse.<UserDetailsForFront>builder().status(Status.SUCCESS)
