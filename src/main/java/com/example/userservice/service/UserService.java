@@ -150,25 +150,26 @@ public class UserService {
     }
     public StandardResponse<String> sendVerificationCode(String email){
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("User not found"));
-        VerificationEntity verificationEntity = VerificationEntity.builder()
-                .userId(userEntity)
-                .code(generateVerificationCode())
-                .build();
-        verificationRepository.save(verificationEntity);
-        mailService.sendVerificationCode(userEntity.getEmail(), verificationEntity.getCode());
+        sendVerification(userEntity, email);
         return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
     }
     public StandardResponse<String> sendVerificationCodeToChangeEmail(String email, Principal principal){
         UserEntity user = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
         Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         if(userEntity.isPresent()) throw new UniqueObjectException("Email already exists");
+        sendVerification(user, email);
+        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
+    }
+    public void sendVerification(UserEntity userEntity, String email){
+        if(verificationRepository.findByUserEmail(userEntity.getEmail()).isPresent()){
+            verificationRepository.delete(verificationRepository.findByUserEmail(userEntity.getEmail()).orElseThrow());
+        }
         VerificationEntity verificationEntity = VerificationEntity.builder()
-                .userId(user)
+                .userId(userEntity)
                 .code(generateVerificationCode())
                 .build();
         verificationRepository.save(verificationEntity);
         mailService.sendVerificationCode(email, verificationEntity.getCode());
-        return StandardResponse.<String>builder().status(Status.SUCCESS).message("Verification code has been sent").build();
     }
 
     public StandardResponse<String> verify(Principal principal, String code) {
