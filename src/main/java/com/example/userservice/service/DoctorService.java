@@ -2,7 +2,6 @@ package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
-import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
