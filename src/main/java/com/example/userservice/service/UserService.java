@@ -272,6 +272,10 @@ public class UserService {
     public String sendEmail(UUID userId){
         return userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("User not found")).getEmail();
     }
+    public UUID sendHospitalId(String employeeEmail){
+        UserEntity employee = userRepository.findByEmail(employeeEmail).orElseThrow(() -> new DataNotFoundException("User not found"));
+        return employee.getEmployeeOfHospital();
+    }
     public DoctorDetailsForBooking sendDoctor(UUID userId){
         UserEntity doctor = userRepository.getDoctorById(userId).orElseThrow(() -> new DataNotFoundException("Doctor not found"));
         return DoctorDetailsForBooking.builder()
