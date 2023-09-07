@@ -82,6 +82,12 @@ public class UserController {
     ) {
         return userService.sendEmail(UUID.fromString(userBookingDto.getSource()));
     }
+    @PostMapping("/send-hospital-id")
+    public UUID sendHospitalId(
+            @RequestBody ExchangeDataDto exchangeDataDto
+    ){
+        return userService.sendHospitalId(exchangeDataDto.getSource());
+    }
 
     @GetMapping("/get-me")
     public StandardResponse<UserDetailsForFront> getMe(
