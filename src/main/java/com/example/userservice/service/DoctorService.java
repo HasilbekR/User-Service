@@ -52,8 +52,6 @@ public class DoctorService {
     private final JwtService jwtService;
 
     private final RestTemplate restTemplate;
-    @Value("${services.create-time-slots}")
-    private String createTimeSlots;
     @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-active}")
     private String countDoctorQueuesByDoctorIdAndQueueStatusActive;
     @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-complete}")
