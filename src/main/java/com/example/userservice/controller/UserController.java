@@ -2,11 +2,11 @@ package com.example.userservice.controller;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
-import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking;
-import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
-import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
-import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
-import com.example.userservice.domain.dto.request.user.*;
+import com.example.userservice.domain.dto.request.doctor.*;
+import com.example.userservice.domain.dto.request.user.CheckPasswordDto;
+import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
+import com.example.userservice.domain.dto.request.user.UserUpdateRequest;
+import com.example.userservice.domain.dto.request.user.VerifyCodeDto;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
@@ -16,7 +16,6 @@ import com.example.userservice.service.DoctorService;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -169,21 +168,23 @@ public class UserController {
 //        return ResponseEntity.ok(userService.findById(UUID.fromString(exchangeDataDto.getSource())));
 //    }
 
-    @PostMapping("/countActiveDoctorBookingAndQueues")
+    @GetMapping("/countActiveDoctorBookingAndQueues")
     @PreAuthorize(value = "hasRole('DOCTOR') and hasRole('ADMIN')")
-    public ResponseEntity<Long> getActiveBookingAndQueues(
+    public StandardResponse<Long> countActiveBookingAndQueues(
             @RequestParam UUID doctorId
     ) {
-        return ResponseEntity.ok(doctorService.countActiveDoctorBookingAndQueues(doctorId));
+        return doctorService.countActiveDoctorBookingAndQueues(doctorId);
     }
 
-    @PostMapping("/countCompleteDoctorBookingAndQueues")
+
+    @GetMapping("/countCompleteDoctorBookingAndQueues")
     @PreAuthorize(value = "hasRole('DOCTOR') and hasRole('ADMIN')")
-    public ResponseEntity<Long> getCompleteDoctorBookingAndQueues(
+    public StandardResponse<Long> countCompleteDoctorBookingAndQueues(
             @RequestParam UUID doctorId
     ) {
-        return ResponseEntity.ok(doctorService.countCompleteDoctorBookingAndQueues(doctorId));
+        return doctorService.countCompleteDoctorBookingAndQueues(doctorId);
     }
+
 //
 //    @PostMapping("/getActiveDoctorBookingAndQueues")
 //    public ResponseEntity<BookingRequestDto> getActiveDoctorBookingAndQueues(

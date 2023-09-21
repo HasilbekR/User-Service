@@ -2,7 +2,6 @@ package com.example.userservice.service;
 
 import com.example.userservice.domain.dto.request.DoctorCreateDto;
 import com.example.userservice.domain.dto.request.ExchangeDataDto;
-import com.example.userservice.domain.entity.doctor.DoctorAvailability;
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
@@ -63,6 +62,14 @@ public class DoctorService {
     private String countDoctorBookingsByDoctorIdAndQueueStatusActive;
     @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-complete}")
     private String countDoctorBookingsByDoctorIdAndQueueStatusComplete;
+    @Value("${services.get-doctors-bookings-by-doctorId-and-queueStatus-active}")
+    private String getDoctorBookingsByDoctorIdAndQueueStatusActive;
+    @Value("${services.get-doctors-bookings-by-doctorId-and-queueStatus-complete}")
+    private String getDoctorBookingsByDoctorIdAndQueueStatusComplete;
+    @Value("${services.get-doctors-queues-by-doctorId-and-queueStatus-active}")
+    private String getDoctorQueuesByDoctorIdAndQueueStatusActive;
+    @Value("${services.get-doctors-queues-by-doctorId-and-queueStatus-complete}")
+    private String getDoctorQueuesByDoctorIdAndQueueStatusComplete;
     @Value("${services.get-working-days}")
     private String getWorkingDays;
 
@@ -199,7 +206,7 @@ public class DoctorService {
         return StandardResponse.<DoctorSpecialty>builder().status(Status.SUCCESS).message("Specialty info").data(doctorSpecialtyRepository.findById(specialtyId).orElseThrow()).build();
     }
 
-    public Long countActiveDoctorBookingAndQueues(UUID doctorId) {
+    public StandardResponse<Long> countActiveDoctorBookingAndQueues(UUID doctorId) {
         ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -216,11 +223,15 @@ public class DoctorService {
                 Long.class);
         System.out.println(Objects.requireNonNull(queueResponse.getBody()));
         System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
-        return queueResponse.getBody() + bookingResponse.getBody();
+        return StandardResponse.<Long>builder()
+                .status(Status.SUCCESS)
+                .message("Count doctor active booking and queues")
+                .data(queueResponse.getBody() + bookingResponse.getBody())
+                .build();
     }
 
 
-    public Long countCompleteDoctorBookingAndQueues(UUID doctorId) {
+    public StandardResponse<Long> countCompleteDoctorBookingAndQueues(UUID doctorId) {
         ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -237,6 +248,10 @@ public class DoctorService {
                 Long.class);
         System.out.println(Objects.requireNonNull(queueResponse.getBody()));
         System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
-        return queueResponse.getBody() + bookingResponse.getBody();
+        return StandardResponse.<Long>builder()
+                .message("Count complete doctor booking and queues")
+                .status(Status.SUCCESS)
+                .data(queueResponse.getBody() + bookingResponse.getBody())
+                .build();
     }
 }
