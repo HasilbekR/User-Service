@@ -60,14 +60,6 @@ public class DoctorService {
     private String countDoctorBookingsByDoctorIdAndQueueStatusActive;
     @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-complete}")
     private String countDoctorBookingsByDoctorIdAndQueueStatusComplete;
-    @Value("${services.get-doctors-bookings-by-doctorId-and-queueStatus-active}")
-    private String getDoctorBookingsByDoctorIdAndQueueStatusActive;
-    @Value("${services.get-doctors-bookings-by-doctorId-and-queueStatus-complete}")
-    private String getDoctorBookingsByDoctorIdAndQueueStatusComplete;
-    @Value("${services.get-doctors-queues-by-doctorId-and-queueStatus-active}")
-    private String getDoctorQueuesByDoctorIdAndQueueStatusActive;
-    @Value("${services.get-doctors-queues-by-doctorId-and-queueStatus-complete}")
-    private String getDoctorQueuesByDoctorIdAndQueueStatusComplete;
     @Value("${services.get-working-days}")
     private String getWorkingDays;
 

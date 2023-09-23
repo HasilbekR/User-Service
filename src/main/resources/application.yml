@@ -16,6 +16,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 
 
 services:
@@ -26,10 +28,6 @@ services:
   count-doctors-queues-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/queue/count-queues-by-doctorId-and-bookingStatus-comlete
   count-doctors-bookings-by-doctorId-and-queueStatus-active : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/count-bookings-by-doctorId-and-bookingStatus-active
   count-doctors-bookings-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/count-bookings-by-doctorId-and-bookingStatus-complete
-  get-doctors-queues-by-doctorId-and-queueStatus-active : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/queue/get-queues-by-doctorId-and-bookingStatus-active
-  get-doctors-queues-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/queue/get-queues-by-doctorId-and-bookingStatus-comlete
-  get-doctors-bookings-by-doctorId-and-queueStatus-active : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/get-bookings-by-doctorId-and-bookingStatus-active
-  get-doctors-bookings-by-doctorId-and-queueStatus-complete : http://HYBRID-BOOKING-SERVICE/hybrid-booking/api/v1/booking/get-bookings-by-doctorId-and-bookingStatus-complete
 eureka:
   client:
     service-url:
