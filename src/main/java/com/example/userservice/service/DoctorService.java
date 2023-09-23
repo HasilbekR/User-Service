@@ -25,7 +25,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -37,7 +40,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -52,14 +54,6 @@ public class DoctorService {
     private final JwtService jwtService;
 
     private final RestTemplate restTemplate;
-    @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-active}")
-    private String countDoctorQueuesByDoctorIdAndQueueStatusActive;
-    @Value("${services.count-doctors-queues-by-doctorId-and-queueStatus-complete}")
-    private String countDoctorQueuesByDoctorIdAndQueueStatusComplete;
-    @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-active}")
-    private String countDoctorBookingsByDoctorIdAndQueueStatusActive;
-    @Value("${services.count-doctors-bookings-by-doctorId-and-queueStatus-complete}")
-    private String countDoctorBookingsByDoctorIdAndQueueStatusComplete;
     @Value("${services.get-working-days}")
     private String getWorkingDays;
 
@@ -194,54 +188,5 @@ public class DoctorService {
 
     public StandardResponse<DoctorSpecialty> getSpecialty(UUID specialtyId) {
         return StandardResponse.<DoctorSpecialty>builder().status(Status.SUCCESS).message("Specialty info").data(doctorSpecialtyRepository.findById(specialtyId).orElseThrow()).build();
-    }
-
-    public StandardResponse<Long> countActiveDoctorBookingAndQueues(UUID doctorId) {
-        ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeData, httpHeaders);
-        ResponseEntity<Long> queueResponse = restTemplate.exchange(
-                URI.create(countDoctorQueuesByDoctorIdAndQueueStatusActive),
-                HttpMethod.POST,
-                entity,
-                Long.class);
-        ResponseEntity<Long> bookingResponse = restTemplate.exchange(
-                URI.create(countDoctorBookingsByDoctorIdAndQueueStatusActive),
-                HttpMethod.POST,
-                entity,
-                Long.class);
-        System.out.println(Objects.requireNonNull(queueResponse.getBody()));
-        System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
-        return StandardResponse.<Long>builder()
-                .status(Status.SUCCESS)
-                .message("Count doctor active booking and queues")
-                .data(queueResponse.getBody() + bookingResponse.getBody())
-                .build();
-    }
-
-
-    public StandardResponse<Long> countCompleteDoctorBookingAndQueues(UUID doctorId) {
-        ExchangeDataDto exchangeData = new ExchangeDataDto(String.valueOf(doctorId));
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ExchangeDataDto> entity = new HttpEntity<>(exchangeData, httpHeaders);
-        ResponseEntity<Long> queueResponse = restTemplate.exchange(
-                URI.create(countDoctorQueuesByDoctorIdAndQueueStatusComplete),
-                HttpMethod.POST,
-                entity,
-                Long.class);
-        ResponseEntity<Long> bookingResponse = restTemplate.exchange(
-                URI.create(countDoctorBookingsByDoctorIdAndQueueStatusComplete),
-                HttpMethod.POST,
-                entity,
-                Long.class);
-        System.out.println(Objects.requireNonNull(queueResponse.getBody()));
-        System.out.println(Objects.requireNonNull(bookingResponse.getBody()));
-        return StandardResponse.<Long>builder()
-                .message("Count complete doctor booking and queues")
-                .status(Status.SUCCESS)
-                .data(queueResponse.getBody() + bookingResponse.getBody())
-                .build();
     }
 }
