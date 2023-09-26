@@ -20,8 +20,11 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Page<UserEntity> getAllDoctorsFromHospital(UUID hospitalId, Pageable pageable);
     @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.email = ?1")
     Optional<UserEntity> getDoctorByEmail(String email);
-    @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.id = ?1")
+//    @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.id = ?1")
+    @Query(value = "SELECT u FROM users u INNER JOIN role r on r.name = 'DOCTOR' AND u.id = ?1")
     Optional<UserEntity> getDoctorById(UUID id);
+
+//    Optional<UserEntity> getUserEntityByIdAndRoles(UUID id, String role);
 
     @Query(value = "select u from users u join u.roles r where r.name = 'USER' and u.id = ?1")
     Optional<UserEntity> getUserById(UUID id);
