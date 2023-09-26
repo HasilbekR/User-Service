@@ -6,10 +6,7 @@ import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorResponseForFront;
 import com.example.userservice.domain.dto.request.doctor.DoctorsWithSpecialtiesForFront;
-import com.example.userservice.domain.dto.request.user.CheckPasswordDto;
-import com.example.userservice.domain.dto.request.user.UserDetailsForFront;
-import com.example.userservice.domain.dto.request.user.UserUpdateRequest;
-import com.example.userservice.domain.dto.request.user.VerifyCodeDto;
+import com.example.userservice.domain.dto.request.user.*;
 import com.example.userservice.domain.dto.response.StandardResponse;
 import com.example.userservice.domain.entity.doctor.DoctorSpecialty;
 import com.example.userservice.domain.entity.doctor.DoctorStatus;
@@ -77,6 +74,13 @@ public class UserController {
             @RequestBody ExchangeDataDto exchangeDataDto
     ) {
         return userService.sendDoctor(UUID.fromString(exchangeDataDto.getSource()));
+    }
+
+    @PostMapping("/send-user")
+    public UserResponseForFront sendUserById(
+            @RequestBody ExchangeDataDto exchangeDataDto
+    ){
+        return userService.sendUser(UUID.fromString(exchangeDataDto.getSource()));
     }
 
     @PostMapping("/send-email")

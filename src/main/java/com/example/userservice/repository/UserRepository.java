@@ -22,6 +22,9 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> getDoctorByEmail(String email);
     @Query(value = "select u from users u join u.roles r where r.name = 'DOCTOR' and u.id = ?1")
     Optional<UserEntity> getDoctorById(UUID id);
+
+    @Query(value = "select u from users u join u.roles r where r.name = 'USER' and u.id = ?1")
+    Optional<UserEntity> getUserById(UUID id);
     @Query(value = "select u.doctorInfo.doctorSpecialty.name from users u where u.employeeOfHospital = ?1")
     List<String> getAllSpecialtiesFromHospital(UUID hospitalId);
     @Query(value = "select u from users u where u.employeeOfHospital = ?1 and u.doctorInfo.doctorSpecialty.name = ?2")
