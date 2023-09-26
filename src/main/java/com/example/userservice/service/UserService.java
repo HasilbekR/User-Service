@@ -288,7 +288,7 @@ public class UserService {
     }
 
     public UserResponseForFront sendUser(UUID userId) {
-        UserEntity user = userRepository.getDoctorById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
+        UserEntity user = userRepository.getUserById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
         return UserResponseForFront.builder()
                 .name(user.getFullName())
                 .id(user.getId())
