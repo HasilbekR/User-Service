@@ -287,6 +287,14 @@ public class UserService {
                 .build();
     }
 
+    public UserResponseForFront sendUser(UUID userId) {
+        UserEntity user = userRepository.getUserById(userId).orElseThrow(() -> new DataNotFoundException("User not found"));
+        return UserResponseForFront.builder()
+                .name(user.getFullName())
+                .id(user.getId())
+                .build();
+    }
+
     public StandardResponse<Boolean> checkPassword(CheckPasswordDto checkPasswordDto, Principal principal) {
         UserEntity userEntity = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new DataNotFoundException("User not found"));
         boolean matches = passwordEncoder.matches(checkPasswordDto.getPassword(), userEntity.getPassword());
