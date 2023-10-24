@@ -1,5 +1,6 @@
 package com.example.userservice.service;
 
+import com.example.userservice.domain.dto.request.SetEmployment;
 import com.example.userservice.domain.dto.request.doctor.DoctorDetailsForBooking;
 import com.example.userservice.domain.dto.request.role.RoleDto;
 import com.example.userservice.domain.dto.request.user.*;
@@ -303,4 +304,9 @@ public class UserService {
     }
 
 
+    public void setEmployment(SetEmployment dto) {
+        UserEntity user = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new DataNotFoundException("User not found"));
+        user.setEmployeeOfHospital(dto.getHospitalId());
+        userRepository.save(user);
+    }
 }
