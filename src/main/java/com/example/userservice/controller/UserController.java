@@ -33,7 +33,7 @@ public class UserController {
     private final UserService userService;
     private final DoctorService doctorService;
     @PostMapping("/add-doctor")
-    @PreAuthorize(value = "hasRole('ADMIN') and hasAuthority('ADD_DOCTOR')")
+    @PreAuthorize(value = "hasRole('ADMIN')")
     public StandardResponse<UserEntity> addDoctor(
             @Valid @RequestBody DoctorCreateDto drCreateDto,
             BindingResult bindingResult,
@@ -82,7 +82,6 @@ public class UserController {
     ){
         return userService.sendUser(UUID.fromString(exchangeDataDto.getSource()));
     }
-
     @PostMapping("/send-email")
     public String exchangeEmail(
             @RequestBody ExchangeDataDto userBookingDto
