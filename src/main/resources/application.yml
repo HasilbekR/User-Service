@@ -26,7 +26,7 @@ services:
 eureka:
   client:
     service-url:
-      defaultUrl: ${EUREKA_URI:https://docs.diordev.me:8761/eureka/}
+      defaultUrl: ${EUREKA_URI:https://127.0.0.1:8761/eureka/}
     instance:
       preferIpAddress: true
 
