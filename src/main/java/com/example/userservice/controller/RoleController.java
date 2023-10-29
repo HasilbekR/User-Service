@@ -46,7 +46,7 @@ public class RoleController {
     }
 
     @PutMapping("/add-permissions-to-role")
-    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+//    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public StandardResponse<RoleEntity> update(
             @RequestBody RoleDto roleDto
     ){
@@ -63,7 +63,7 @@ public class RoleController {
     }
 
     @PostMapping("/add-permissions-to-user")
-    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+//    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public StandardResponse<String> assignPermissionsToUser(
             @RequestBody RoleAssignDto roleAssignDto
     ) {
@@ -71,7 +71,7 @@ public class RoleController {
     }
 
     @PostMapping("/assign-hospital")
-    @PreAuthorize(value = "hasRole('OWNER')")
+//    @PreAuthorize(value = "hasRole('OWNER')")
     public StandardResponse<String> assignHospital(
             @RequestBody HospitalAssignDto hospitalAssignDto
             ){
