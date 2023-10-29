@@ -25,7 +25,7 @@ import java.util.List;
 public class RoleController {
     private final RoleService roleService;
     @PostMapping("/create")
-    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+//    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public StandardResponse<RoleEntity> createRole(
             @Valid @RequestBody RoleDto roleDto,
             BindingResult bindingResult
