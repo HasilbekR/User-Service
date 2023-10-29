@@ -54,7 +54,7 @@ public class RoleController {
     }
 
     @PostMapping("/assign-role-permissions-to-user")
-    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+//    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
     public StandardResponse<String> assignRoleToUser(
             @RequestBody RoleAssignDto roleAssignDto,
             Principal principal
