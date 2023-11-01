@@ -107,6 +107,23 @@ public class UserService {
         if (passwordEncoder.matches(loginRequestDto.getPassword(), userEntity.getPassword())) {
             String accessToken = jwtService.generateAccessToken(userEntity);
             String refreshToken = jwtService.generateRefreshToken(userEntity);
+            List<RoleEntity> roles = userEntity.getRoles();
+            if(!roles.isEmpty()){
+                int position = 0;
+                int i = 0;
+                for(RoleEntity role : roles){
+                    if(role.getName().equals("ADMIN")){
+                        position = i;
+                    }
+                    i++;
+                }
+                if(position > 0){
+                    RoleEntity roleEntity = roles.get(0);
+                    RoleEntity admin = roles.get(position);
+                    roles.set(0, admin);
+                    roles.set(position, roleEntity);
+                }
+            }
             UserDetailsForFront user = mappingUser(userEntity);
             JwtResponse jwtResponse = JwtResponse.builder()
                     .accessToken(accessToken)
