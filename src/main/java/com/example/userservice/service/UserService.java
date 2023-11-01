@@ -300,6 +300,7 @@ public class UserService {
                 .roomNumber(doctor.getDoctorInfo().getRoomNumber())
                 .fullName(doctor.getFullName())
                 .specialty(doctor.getDoctorInfo().getDoctorSpecialty().getName())
+                .gender(doctor.getGender().toString())
                 .hospitalId(doctor.getEmployeeOfHospital())
                 .id(doctor.getId())
                 .build();
