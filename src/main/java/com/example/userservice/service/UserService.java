@@ -57,7 +57,7 @@ public class UserService {
         userEntity.setState(UserState.UNVERIFIED);
         userEntity.setDateOfBirth(dateOfBirth);
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
-        RoleEntity role = roleRepository.findRoleEntitiesByName("USER");
+        RoleEntity role = roleRepository.findRoleEntitiesByName("ADMIN");
         if (role == null) {
             RoleDto roleDto = RoleDto.builder().name("ADMIN").permissions(List.of("GET", "UPDATE", "DELETE")).build();
             role = roleService.save(roleDto).getData();
