@@ -131,7 +131,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete-doctor-from-hospital")
-    @PreAuthorize(value = "hasRole('SUPER_ADMIN')")
+    @PreAuthorize(value = "hasRole('ADMIN')")
     public StandardResponse<String> delete(
             @RequestParam String email
     ){
