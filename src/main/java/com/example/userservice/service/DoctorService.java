@@ -70,10 +70,16 @@ public class DoctorService {
         DoctorSpecialty specialty = doctorSpecialtyRepository.findDoctorSpecialtyByName(drCreateDto.getDoctorSpecialty()).orElseThrow(() -> new DataNotFoundException("Doctor specialty not found"));
         doctorInfo.setDoctorSpecialty(specialty);
         List<RoleEntity> roles = user.getRoles();
-        roles.addAll(getRolesString(drCreateDto.getRoles()));
+        RoleEntity doctor = roleRepository.findRoleEntitiesByName("DOCTOR");
+        if(doctor != null) {
+            roles.add(roleRepository.findRoleEntitiesByName("DOCTOR"));
+        }
         user.setRoles(roles);
         List<PermissionEntity> permissions = user.getPermissions();
-        permissions.addAll(getPermissionsString(drCreateDto.getPermissions()));
+        PermissionEntity seeAPatient = permissionRepository.findPermissionEntitiesByPermission("SEE_A_PATIENT");
+        if(seeAPatient != null) {
+            permissions.add(seeAPatient);
+        }
         user.setPermissions(permissions);
         doctorInfo.setStatus(DoctorStatus.ACTIVE);
         doctorInfo.setCreatedDate(LocalDateTime.now());
